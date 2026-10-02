@@ -9,6 +9,7 @@ services:
     environment:
       # Inside Docker nothing is on "localhost": each container is reached by its network name
       DATABASE_URL: jdbc:sqlserver://sqlserver:1433;databaseName=rentamovil;encrypt=true;trustServerCertificate=true
+      IAM_URL: http://iam:3001
     ports:
       - "${APP_FLEET_MAINTENANCE_PORT:-3002}:3002"
     networks:

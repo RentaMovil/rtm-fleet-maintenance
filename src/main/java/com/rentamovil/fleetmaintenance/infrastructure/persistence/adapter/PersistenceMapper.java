@@ -10,11 +10,14 @@ import com.rentamovil.fleetmaintenance.domain.entity.Branch;
 import com.rentamovil.fleetmaintenance.domain.entity.CatalogItem;
 import com.rentamovil.fleetmaintenance.domain.entity.OperatingHour;
 import com.rentamovil.fleetmaintenance.domain.entity.Vehicle;
+import com.rentamovil.fleetmaintenance.domain.entity.VehicleMaintenance;
 import com.rentamovil.fleetmaintenance.domain.entity.VehicleModel;
+import com.rentamovil.fleetmaintenance.domain.enums.MaintenanceStatus;
 import com.rentamovil.fleetmaintenance.domain.enums.VehicleStatus;
 import com.rentamovil.fleetmaintenance.infrastructure.persistence.entity.BranchEntity;
 import com.rentamovil.fleetmaintenance.infrastructure.persistence.entity.BranchOperatingHourEntity;
 import com.rentamovil.fleetmaintenance.infrastructure.persistence.entity.VehicleEntity;
+import com.rentamovil.fleetmaintenance.infrastructure.persistence.entity.VehicleMaintenanceEntity;
 import com.rentamovil.fleetmaintenance.infrastructure.persistence.entity.VehicleModelEntity;
 
 // Converts between domain entities and JPA entities (tables)
@@ -62,6 +65,30 @@ public final class PersistenceMapper {
         entity.setMileage(vehicle.getMileage());
         entity.setDailyPrice(vehicle.getDailyPrice());
         entity.setBranch(branch);
+        return entity;
+    }
+
+    public static VehicleMaintenance toDomain(VehicleMaintenanceEntity entity) {
+        return VehicleMaintenance.builder()
+                .id(entity.getId())
+                .vehicleId(entity.getVehicleId())
+                .maintenanceTypeId(entity.getMaintenanceTypeId())
+                .startDate(entity.getStartDate())
+                .endDate(entity.getEndDate())
+                .cost(entity.getCost())
+                .status(MaintenanceStatus.valueOf(entity.getStatus()))
+                .build();
+    }
+
+    public static VehicleMaintenanceEntity toEntity(VehicleMaintenance maintenance) {
+        VehicleMaintenanceEntity entity = new VehicleMaintenanceEntity();
+        entity.setId(maintenance.getId());
+        entity.setVehicleId(maintenance.getVehicleId());
+        entity.setMaintenanceTypeId(maintenance.getMaintenanceTypeId());
+        entity.setStartDate(maintenance.getStartDate());
+        entity.setEndDate(maintenance.getEndDate());
+        entity.setCost(maintenance.getCost());
+        entity.setStatus(maintenance.getStatus().name());
         return entity;
     }
 

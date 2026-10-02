@@ -99,6 +99,9 @@ docker compose up -d --build
 | GET | `/vehicles/{id}/availability?from&to` | — | HU-FLEET-002 | 200 `{"available": ...}` · 400 · 404 · 503 |
 | POST | `/vehicles` | Bearer + `vehicles:create` | HU-FLEET-004 | 201 (always `AVAILABLE`) · 400 · 403 · 409 `PLATE_ALREADY_EXISTS` |
 | PUT | `/vehicles/{id}` | Bearer + `vehicles:update` | HU-FLEET-005 | 200 · 400 · 403 · 404 · 409 `PLATE_ALREADY_EXISTS` / `MILEAGE_CANNOT_DECREASE` / `VEHICLE_RETIRED` |
+| PATCH | `/vehicles/{id}/status` | Bearer + `maintenance:create` (MAINTENANCE) / `vehicles:update` (RETIRED) | HU-FLEET-005, 006 | 200 · 400 · 403 · 404 · 409 `VEHICLE_RENTED` / `VEHICLE_RETIRED` / `INVALID_STATUS_TRANSITION` / `VEHICLE_HAS_FUTURE_RESERVATIONS` · 503 |
+| POST | `/vehicles/{id}/maintenance/complete` | Bearer + `maintenance:update` | HU-FLEET-006 | 200 · 403 · 404 · 409 `NO_MAINTENANCE_IN_PROGRESS` |
+| GET | `/vehicles/stats` | Bearer + `vehicles:update` | HU-FLEET-006 | 200 (count per status) · 403 |
 
 Errors follow `ErrorResponse` from `_shared.yaml`: `{"error": "CODE", "message": "...", "details": [...]}`.
 
@@ -113,6 +116,14 @@ Branches always carry the 7 weekdays (`1` = Monday … `7` = Sunday). A closed d
 asked synchronously for every vehicle (`/internal/reservations/vehicle-occupancy`, no JWT, internal
 network). If it's down, date-filtered searches, availability checks and retiring answer `503`
 instead of guessing (`decisions.md`).
+
+**Status rules:** `AVAILABLE` is never a manual target. A vehicle is created `AVAILABLE`, goes back
+to it when a maintenance is completed or a rental ends, can't go to maintenance or be retired while
+`RENTED`, and `RETIRED` is terminal (rows are never deleted).
+
+**Events published:** `VehicleSentToMaintenance`, `MaintenanceCompleted`. For now
+`LogEventPublisherAdapter` writes them to the service log (look for `[EVENT]`) with the
+`02-domain/domain-events.md` envelope; only that adapter changes once `booking-reservation` exists.
 
 Every change is recorded in `shared.audit` (`BRANCH_CREATED`, `VEHICLE_REGISTERED`,
 `VEHICLE_SENT_TO_MAINTENANCE`, ...).

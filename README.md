@@ -10,6 +10,7 @@ API contract: `rtm-docs/07-api/contracts/openapi/fleet-maintenance.yaml`.
 | Local port | 3002 |
 | Database | SQL Server `rentamovil`, schema `fleet`, user `fleet_app` |
 | Migrations | **not here** — they live in `rtm-fleet-maintenance-db` (Liquibase) |
+| Depends on | `iam` (public key at `/jwks` to verify tokens) |
 
 ## Layout (hexagonal)
 
@@ -45,6 +46,7 @@ a changeset in `rtm-fleet-maintenance-db` first.
 - Java 21+
 - Maven 3.9+
 - SQL Server running, migrated by `rtm-iam-db` and then `rtm-fleet-maintenance-db`
+- `rtm-iam` running (only its `/jwks` is used; keys are cached after the first request)
 
 ## Local usage
 
@@ -88,6 +90,10 @@ docker compose up -d --build
 | GET | `/health` | — | — | 200 / 503 |
 
 Errors follow `ErrorResponse` from `_shared.yaml`: `{"error": "CODE", "message": "...", "details": [...]}`.
+
+Endpoints with Bearer receive the caller through `@CurrentUser AuthenticatedUser`: the token is
+**verified again here** with iam's public key (RS256, `/jwks`), never trusted from the gateway's
+`X-User-*` headers, and each use case checks the permission it needs (`07-api/authentication.md`).
 
 ## Branches
 

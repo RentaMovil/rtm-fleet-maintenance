@@ -102,6 +102,7 @@ docker compose up -d --build
 | PATCH | `/vehicles/{id}/status` | Bearer + `maintenance:create` (MAINTENANCE) / `vehicles:update` (RETIRED) | HU-FLEET-005, 006 | 200 · 400 · 403 · 404 · 409 `VEHICLE_RENTED` / `VEHICLE_RETIRED` / `INVALID_STATUS_TRANSITION` / `VEHICLE_HAS_FUTURE_RESERVATIONS` · 503 |
 | POST | `/vehicles/{id}/maintenance/complete` | Bearer + `maintenance:update` | HU-FLEET-006 | 200 · 403 · 404 · 409 `NO_MAINTENANCE_IN_PROGRESS` |
 | GET | `/vehicles/stats` | Bearer + `vehicles:update` | HU-FLEET-006 | 200 (count per status) · 403 |
+| POST | `/internal/events` | — (internal network only) | — | 204 · 400 · 404 · 409 `INVALID_STATUS_TRANSITION` |
 
 Errors follow `ErrorResponse` from `_shared.yaml`: `{"error": "CODE", "message": "...", "details": [...]}`.
 
@@ -124,6 +125,10 @@ to it when a maintenance is completed or a rental ends, can't go to maintenance 
 **Events published:** `VehicleSentToMaintenance`, `MaintenanceCompleted`. For now
 `LogEventPublisherAdapter` writes them to the service log (look for `[EVENT]`) with the
 `02-domain/domain-events.md` envelope; only that adapter changes once `booking-reservation` exists.
+
+**Events consumed:** `RentalStarted` (→ `RENTED`) and `RentalCompleted` (→ `AVAILABLE`) through
+`POST /internal/events`. Idempotent: the same event twice leaves the same status. The gateway
+doesn't route `/internal/**`, so only services on the Docker network can call it.
 
 Every change is recorded in `shared.audit` (`BRANCH_CREATED`, `VEHICLE_REGISTERED`,
 `VEHICLE_SENT_TO_MAINTENANCE`, ...).

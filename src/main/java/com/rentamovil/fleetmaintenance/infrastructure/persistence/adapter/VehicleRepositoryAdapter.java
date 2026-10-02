@@ -1,10 +1,15 @@
 package com.rentamovil.fleetmaintenance.infrastructure.persistence.adapter;
 
+import java.util.Optional;
+
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import com.rentamovil.fleetmaintenance.domain.entity.Vehicle;
 import com.rentamovil.fleetmaintenance.domain.port.out.VehicleRepositoryPort;
+import com.rentamovil.fleetmaintenance.infrastructure.persistence.repository.BranchJpaRepository;
 import com.rentamovil.fleetmaintenance.infrastructure.persistence.repository.VehicleJpaRepository;
+import com.rentamovil.fleetmaintenance.infrastructure.persistence.repository.VehicleModelJpaRepository;
 
 import lombok.RequiredArgsConstructor;
 
@@ -16,6 +21,30 @@ import lombok.RequiredArgsConstructor;
 public class VehicleRepositoryAdapter implements VehicleRepositoryPort {
 
     private final VehicleJpaRepository vehicleJpaRepository;
+    private final VehicleModelJpaRepository vehicleModelJpaRepository;
+    private final BranchJpaRepository branchJpaRepository;
+
+    @Override
+    @Transactional
+    public Vehicle save(Vehicle vehicle) {
+        //getReferenceById doesn't hit the database: the use case already checked model and branch exist
+        var entity = PersistenceMapper.toEntity(vehicle,
+                vehicleModelJpaRepository.getReferenceById(vehicle.getModel().getId()),
+                branchJpaRepository.getReferenceById(vehicle.getBranch().getId()));
+        var saved = vehicleJpaRepository.saveAndFlush(entity);
+        //Read it back to return brand, category, branch names...
+        return vehicleJpaRepository.findById(saved.getId()).map(PersistenceMapper::toDomain).orElseThrow();
+    }
+
+    @Override
+    public Optional<Vehicle> findById(Integer id) {
+        return vehicleJpaRepository.findById(id).map(PersistenceMapper::toDomain);
+    }
+
+    @Override
+    public boolean existsByPlate(String plate) {
+        return vehicleJpaRepository.existsByPlate(plate);
+    }
 
     @Override
     public boolean existsByBranchId(Integer branchId) {

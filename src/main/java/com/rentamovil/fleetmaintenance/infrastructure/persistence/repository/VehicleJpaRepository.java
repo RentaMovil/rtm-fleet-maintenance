@@ -37,4 +37,8 @@ public interface VehicleJpaRepository extends JpaRepository<VehicleEntity, Integ
                                @Param("engineTypeId") Integer engineTypeId,
                                @Param("minPrice") BigDecimal minPrice,
                                @Param("maxPrice") BigDecimal maxPrice);
+
+    // Rows [status, count] for the statistics panel
+    @Query("SELECT v.status, COUNT(v) FROM VehicleEntity v GROUP BY v.status")
+    List<Object[]> countGroupedByStatus();
 }

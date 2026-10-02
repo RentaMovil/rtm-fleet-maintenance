@@ -3,6 +3,7 @@ package com.rentamovil.fleetmaintenance.application.usecase;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -10,25 +11,32 @@ import static org.mockito.Mockito.when;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.rentamovil.fleetmaintenance.domain.entity.Branch;
 import com.rentamovil.fleetmaintenance.domain.entity.OperatingHour;
+import com.rentamovil.fleetmaintenance.domain.exception.BusinessRuleException;
+import com.rentamovil.fleetmaintenance.domain.exception.ForbiddenException;
 import com.rentamovil.fleetmaintenance.domain.exception.InvalidDataException;
 import com.rentamovil.fleetmaintenance.domain.port.in.BranchData;
 import com.rentamovil.fleetmaintenance.domain.port.out.AuditPort;
 import com.rentamovil.fleetmaintenance.domain.port.out.BranchRepositoryPort;
+import com.rentamovil.fleetmaintenance.domain.port.out.VehicleRepositoryPort;
 
 @ExtendWith(MockitoExtension.class)
 class ManageBranchUseCaseImplTest {
 
     @Mock
     private BranchRepositoryPort branchRepositoryPort;
+    @Mock
+    private VehicleRepositoryPort vehicleRepositoryPort;
     @Mock
     private AuditPort auditPort;
 
@@ -83,5 +91,35 @@ class ManageBranchUseCaseImplTest {
         assertThatThrownBy(() -> manageBranchUseCase.create(TestData.ADMIN, data(hours)))
                 .isInstanceOf(InvalidDataException.class)
                 .hasMessageContaining("must open before it closes");
+    }
+
+    @Test
+    void branchWithVehiclesIsNotDeleted() {
+        when(branchRepositoryPort.findById(4)).thenReturn(Optional.of(Branch.builder().id(4).name("Centro").build()));
+        when(vehicleRepositoryPort.existsByBranchId(4)).thenReturn(true);
+
+        assertThatThrownBy(() -> manageBranchUseCase.delete(TestData.ADMIN, 4))
+                .isInstanceOf(BusinessRuleException.class)
+                .hasFieldOrPropertyWithValue("code", "BRANCH_HAS_VEHICLES");
+        verify(branchRepositoryPort, never()).deleteById(anyInt());
+    }
+
+    @Test
+    void deletesBranchWithoutVehicles() {
+        when(branchRepositoryPort.findById(4)).thenReturn(Optional.of(Branch.builder().id(4).name("Centro").build()));
+        when(vehicleRepositoryPort.existsByBranchId(4)).thenReturn(false);
+
+        manageBranchUseCase.delete(TestData.ADMIN, 4);
+
+        verify(branchRepositoryPort).deleteById(4);
+        ArgumentCaptor<String> action = ArgumentCaptor.forClass(String.class);
+        verify(auditPort).record(any(), action.capture(), any(), any(), any());
+        assertThat(action.getValue()).isEqualTo("BRANCH_DELETED");
+    }
+
+    @Test
+    void clientCannotManageBranches() {
+        assertThatThrownBy(() -> manageBranchUseCase.delete(TestData.CLIENT, 4))
+                .isInstanceOf(ForbiddenException.class);
     }
 }

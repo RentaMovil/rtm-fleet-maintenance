@@ -1,6 +1,7 @@
 package com.rentamovil.fleetmaintenance.infrastructure.persistence.adapter;
 
 import java.util.List;
+import java.util.Optional;
 
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,6 +41,11 @@ public class BranchRepositoryAdapter implements BranchRepositoryPort {
     }
 
     @Override
+    public Optional<Branch> findById(Integer id) {
+        return branchJpaRepository.findWithHoursById(id).map(PersistenceMapper::toDomain);
+    }
+
+    @Override
     public boolean existsById(Integer id) {
         return branchJpaRepository.existsById(id);
     }
@@ -47,5 +53,14 @@ public class BranchRepositoryAdapter implements BranchRepositoryPort {
     @Override
     public List<Branch> findAll() {
         return branchJpaRepository.findAllWithHours().stream().map(PersistenceMapper::toDomain).toList();
+    }
+
+    // flush here: if a booking-reservation reservation still points to this branch, the FK stops
+    // it now (DataIntegrityViolationException -> 409) instead of at commit time
+    @Override
+    @Transactional
+    public void deleteById(Integer id) {
+        branchJpaRepository.deleteById(id);
+        branchJpaRepository.flush();
     }
 }

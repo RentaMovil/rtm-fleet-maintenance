@@ -3,6 +3,7 @@ package com.rentamovil.fleetmaintenance.infrastructure.web.controller;
 import java.util.List;
 
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -48,5 +49,11 @@ public class BranchController {
                                  @PathVariable Integer id,
                                  @Valid @RequestBody BranchWriteRequest request) {
         return BranchResponse.from(manageBranchUseCase.update(currentUser, id, request.toData()));
+    }
+
+    @DeleteMapping("/{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void delete(@CurrentUser AuthenticatedUser currentUser, @PathVariable Integer id) {
+        manageBranchUseCase.delete(currentUser, id);
     }
 }

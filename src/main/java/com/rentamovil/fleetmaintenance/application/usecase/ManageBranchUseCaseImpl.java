@@ -12,12 +12,14 @@ import com.rentamovil.fleetmaintenance.domain.entity.AuthenticatedUser;
 import com.rentamovil.fleetmaintenance.domain.entity.Branch;
 import com.rentamovil.fleetmaintenance.domain.entity.OperatingHour;
 import com.rentamovil.fleetmaintenance.domain.entity.Permissions;
+import com.rentamovil.fleetmaintenance.domain.exception.BusinessRuleException;
 import com.rentamovil.fleetmaintenance.domain.exception.InvalidDataException;
 import com.rentamovil.fleetmaintenance.domain.exception.ResourceNotFoundException;
 import com.rentamovil.fleetmaintenance.domain.port.in.BranchData;
 import com.rentamovil.fleetmaintenance.domain.port.in.ManageBranchUseCase;
 import com.rentamovil.fleetmaintenance.domain.port.out.AuditPort;
 import com.rentamovil.fleetmaintenance.domain.port.out.BranchRepositoryPort;
+import com.rentamovil.fleetmaintenance.domain.port.out.VehicleRepositoryPort;
 
 import lombok.RequiredArgsConstructor;
 
@@ -25,6 +27,7 @@ import lombok.RequiredArgsConstructor;
 public class ManageBranchUseCaseImpl implements ManageBranchUseCase {
 
     private final BranchRepositoryPort branchRepositoryPort;
+    private final VehicleRepositoryPort vehicleRepositoryPort;
     private final AuditPort auditPort;
 
     @Override
@@ -49,6 +52,24 @@ public class ManageBranchUseCaseImpl implements ManageBranchUseCase {
         Branch saved = branchRepositoryPort.save(toBranch(branchId, data));
         auditPort.record(caller.getUserId(), "BRANCH_UPDATED", "branch", branchId, Map.of("name", saved.getName()));
         return saved;
+    }
+
+    @Override
+    @Transactional
+    public void delete(AuthenticatedUser caller, Integer branchId) {
+        Authorization.require(caller, Permissions.BRANCHES_MANAGE);
+
+        Branch branch = branchRepositoryPort.findById(branchId)
+                .orElseThrow(() -> new ResourceNotFoundException("Branch not found: " + branchId));
+
+        //HU-FLEET-007 scenario 2. RETIRED vehicles count too: their row still points to the branch
+        if (vehicleRepositoryPort.existsByBranchId(branchId)) {
+            throw new BusinessRuleException("BRANCH_HAS_VEHICLES",
+                    "The branch has vehicles assigned: reassign them first");
+        }
+
+        branchRepositoryPort.deleteById(branchId);
+        auditPort.record(caller.getUserId(), "BRANCH_DELETED", "branch", branchId, Map.of("name", branch.getName()));
     }
 
     private static Branch toBranch(Integer id, BranchData data) {

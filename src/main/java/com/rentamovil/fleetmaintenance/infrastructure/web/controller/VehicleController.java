@@ -1,18 +1,31 @@
 package com.rentamovil.fleetmaintenance.infrastructure.web.controller;
 
+import java.math.BigDecimal;
+import java.time.LocalDate;
+
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.format.annotation.DateTimeFormat.ISO;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.rentamovil.fleetmaintenance.domain.entity.AuthenticatedUser;
+import com.rentamovil.fleetmaintenance.domain.entity.VehicleSearchCriteria;
+import com.rentamovil.fleetmaintenance.domain.port.in.CheckVehicleAvailabilityUseCase;
+import com.rentamovil.fleetmaintenance.domain.port.in.GetVehicleUseCase;
 import com.rentamovil.fleetmaintenance.domain.port.in.RegisterVehicleUseCase;
+import com.rentamovil.fleetmaintenance.domain.port.in.SearchVehiclesUseCase;
 import com.rentamovil.fleetmaintenance.domain.port.in.UpdateVehicleUseCase;
 import com.rentamovil.fleetmaintenance.infrastructure.web.auth.CurrentUser;
+import com.rentamovil.fleetmaintenance.infrastructure.web.dto.AvailabilityResponse;
+import com.rentamovil.fleetmaintenance.infrastructure.web.dto.VehiclePageResponse;
 import com.rentamovil.fleetmaintenance.infrastructure.web.dto.VehicleResponse;
 import com.rentamovil.fleetmaintenance.infrastructure.web.dto.VehicleWriteRequest;
 
@@ -25,8 +38,44 @@ import lombok.RequiredArgsConstructor;
 @RequestMapping("/vehicles")
 @RequiredArgsConstructor
 public class VehicleController {
+
+    private final SearchVehiclesUseCase searchVehiclesUseCase;
+    private final GetVehicleUseCase getVehicleUseCase;
+    private final CheckVehicleAvailabilityUseCase checkVehicleAvailabilityUseCase;
     private final RegisterVehicleUseCase registerVehicleUseCase;
     private final UpdateVehicleUseCase updateVehicleUseCase;
+
+    @GetMapping
+    public VehiclePageResponse search(@RequestParam(required = false) @DateTimeFormat(iso = ISO.DATE) LocalDate dateFrom,
+                                      @RequestParam(required = false) @DateTimeFormat(iso = ISO.DATE) LocalDate dateTo,
+                                      @RequestParam(required = false) Integer branchId,
+                                      @RequestParam(required = false) Integer categoryId,
+                                      @RequestParam(required = false) Integer brandId,
+                                      @RequestParam(required = false) Integer engineTypeId,
+                                      @RequestParam(required = false) BigDecimal minPrice,
+                                      @RequestParam(required = false) BigDecimal maxPrice,
+                                      @RequestParam(required = false) Integer page,
+                                      @RequestParam(required = false) Integer limit) {
+        VehicleSearchCriteria criteria = VehicleSearchCriteria.builder()
+                .dateFrom(dateFrom).dateTo(dateTo)
+                .branchId(branchId).categoryId(categoryId).brandId(brandId).engineTypeId(engineTypeId)
+                .minPrice(minPrice).maxPrice(maxPrice)
+                .page(page).limit(limit)
+                .build();
+        return VehiclePageResponse.from(searchVehiclesUseCase.search(criteria));
+    }
+
+    @GetMapping("/{id}")
+    public VehicleResponse getVehicle(@PathVariable Integer id) {
+        return VehicleResponse.from(getVehicleUseCase.getVehicle(id));
+    }
+
+    @GetMapping("/{id}/availability")
+    public AvailabilityResponse availability(@PathVariable Integer id,
+                                             @RequestParam @DateTimeFormat(iso = ISO.DATE) LocalDate from,
+                                             @RequestParam @DateTimeFormat(iso = ISO.DATE) LocalDate to) {
+        return new AvailabilityResponse(checkVehicleAvailabilityUseCase.isAvailable(id, from, to));
+    }
 
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)

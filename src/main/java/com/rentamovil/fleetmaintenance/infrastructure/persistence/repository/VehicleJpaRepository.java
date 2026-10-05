@@ -16,12 +16,13 @@ public interface VehicleJpaRepository extends JpaRepository<VehicleEntity, Integ
 
     boolean existsByBranchId(Integer branchId);
 
-    // Catalog: a null filter doesn't filter. Category and engine are read through the model.
+    // Catalog and admin inventory: a null filter doesn't filter (status included).
+    // Category and engine are read through the model.
     @Query("""
             SELECT v FROM VehicleEntity v
             JOIN FETCH v.model m JOIN FETCH m.brand JOIN FETCH m.category JOIN FETCH m.engineType
             JOIN FETCH v.branch
-            WHERE v.status = :status
+            WHERE (:status IS NULL OR v.status = :status)
               AND (:branchId IS NULL OR v.branch.id = :branchId)
               AND (:categoryId IS NULL OR m.category.id = :categoryId)
               AND (:brandId IS NULL OR m.brand.id = :brandId)

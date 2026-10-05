@@ -23,6 +23,9 @@ public interface VehicleRepositoryPort {
     // resolves those). Ordered by id so paging is stable.
     List<Vehicle> searchAvailable(VehicleSearchCriteria criteria);
 
+    // Every vehicle, any status unless one is given (admin inventory). Ordered by id
+    List<Vehicle> findInventory(VehicleStatus status, Integer branchId);
+
     Map<VehicleStatus, Long> countByStatus();
 
     boolean existsByBranchId(Integer branchId);

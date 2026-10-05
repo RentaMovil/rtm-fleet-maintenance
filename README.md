@@ -101,6 +101,7 @@ docker compose up -d --build
 | PUT | `/vehicles/{id}` | Bearer + `vehicles:update` | HU-FLEET-005 | 200 · 400 · 403 · 404 · 409 `PLATE_ALREADY_EXISTS` / `MILEAGE_CANNOT_DECREASE` / `VEHICLE_RETIRED` |
 | PATCH | `/vehicles/{id}/status` | Bearer + `maintenance:create` (MAINTENANCE) / `vehicles:update` (RETIRED) | HU-FLEET-005, 006 | 200 · 400 · 403 · 404 · 409 `VEHICLE_RENTED` / `VEHICLE_RETIRED` / `INVALID_STATUS_TRANSITION` / `VEHICLE_HAS_FUTURE_RESERVATIONS` · 503 |
 | POST | `/vehicles/{id}/maintenance/complete` | Bearer + `maintenance:update` | HU-FLEET-006 | 200 · 403 · 404 · 409 `NO_MAINTENANCE_IN_PROGRESS` |
+| GET | `/vehicles/inventory?status=&branchId=` | Bearer + `vehicles:update` | Admin inventory | 200 (every status, not paged) · 403 |
 | GET | `/vehicles/stats` | Bearer + `vehicles:update` | HU-FLEET-006 | 200 (count per status) · 403 |
 | GET | `/maintenances?vehicleId=&status=` | Bearer + `maintenance:update` | Admin history | 200 (newest first, with plate, vehicle name and type) · 403 |
 | POST | `/internal/events` | — (internal network only) | — | 204 · 400 · 404 · 409 `INVALID_STATUS_TRANSITION` |

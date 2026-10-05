@@ -9,9 +9,12 @@ import java.util.stream.Collectors;
 import com.rentamovil.fleetmaintenance.domain.entity.Branch;
 import com.rentamovil.fleetmaintenance.domain.entity.CatalogItem;
 import com.rentamovil.fleetmaintenance.domain.entity.OperatingHour;
+import com.rentamovil.fleetmaintenance.domain.entity.Vehicle;
 import com.rentamovil.fleetmaintenance.domain.entity.VehicleModel;
+import com.rentamovil.fleetmaintenance.domain.enums.VehicleStatus;
 import com.rentamovil.fleetmaintenance.infrastructure.persistence.entity.BranchEntity;
 import com.rentamovil.fleetmaintenance.infrastructure.persistence.entity.BranchOperatingHourEntity;
+import com.rentamovil.fleetmaintenance.infrastructure.persistence.entity.VehicleEntity;
 import com.rentamovil.fleetmaintenance.infrastructure.persistence.entity.VehicleModelEntity;
 
 // Converts between domain entities and JPA entities (tables)
@@ -28,6 +31,38 @@ public final class PersistenceMapper {
                 .category(new CatalogItem(entity.getCategory().getId(), entity.getCategory().getName()))
                 .engineType(new CatalogItem(entity.getEngineType().getId(), entity.getEngineType().getName()))
                 .build();
+    }
+
+    public static Vehicle toDomain(VehicleEntity entity) {
+        return Vehicle.builder()
+                .id(entity.getId())
+                .plate(entity.getPlate())
+                .model(toDomain(entity.getModel()))
+                .capacity(entity.getCapacity())
+                .year(entity.getYear())
+                .imageUrl(entity.getImageUrl())
+                .status(VehicleStatus.valueOf(entity.getStatus()))
+                .mileage(entity.getMileage())
+                .dailyPrice(entity.getDailyPrice())
+                //Just id and name: the branch hours aren't needed to show a vehicle
+                .branch(new CatalogItem(entity.getBranch().getId(), entity.getBranch().getName()))
+                .build();
+    }
+
+    // model and branch come already resolved (JPA references to existing rows)
+    public static VehicleEntity toEntity(Vehicle vehicle, VehicleModelEntity model, BranchEntity branch) {
+        VehicleEntity entity = new VehicleEntity();
+        entity.setId(vehicle.getId());
+        entity.setPlate(vehicle.getPlate());
+        entity.setModel(model);
+        entity.setCapacity(vehicle.getCapacity());
+        entity.setYear(vehicle.getYear());
+        entity.setImageUrl(vehicle.getImageUrl());
+        entity.setStatus(vehicle.getStatus().name());
+        entity.setMileage(vehicle.getMileage());
+        entity.setDailyPrice(vehicle.getDailyPrice());
+        entity.setBranch(branch);
+        return entity;
     }
 
     // Always returns the 7 days: those without a row in the table are closed

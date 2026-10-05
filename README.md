@@ -90,7 +90,7 @@ docker compose up -d --build
 |---|---|---|---|---|
 | GET | `/health` | — | — | 200 / 503 |
 | GET | `/brands`, `/categories`, `/engine-types`, `/vehicle-models`, `/maintenance-types` | — | — | 200 |
-| GET | `/branches` | — | HU-FLEET-007 | 200 (with the 7 days of operating hours) |
+| GET | `/branches` | — | HU-FLEET-007 | 200 (with the 7 days of operating hours and optional `latitude`/`longitude` for the map) |
 | POST | `/branches` | Bearer + `branches:manage` | HU-FLEET-007 | 201 · 400 `VALIDATION_ERROR` · 403 |
 | PUT | `/branches/{id}` | Bearer + `branches:manage` | HU-FLEET-007 | 200 · 400 · 403 · 404 |
 | DELETE | `/branches/{id}` | Bearer + `branches:manage` | HU-FLEET-007 | 204 · 403 · 404 · 409 `BRANCH_HAS_VEHICLES` / `RESOURCE_IN_USE` |
@@ -102,6 +102,7 @@ docker compose up -d --build
 | PATCH | `/vehicles/{id}/status` | Bearer + `maintenance:create` (MAINTENANCE) / `vehicles:update` (RETIRED) | HU-FLEET-005, 006 | 200 · 400 · 403 · 404 · 409 `VEHICLE_RENTED` / `VEHICLE_RETIRED` / `INVALID_STATUS_TRANSITION` / `VEHICLE_HAS_FUTURE_RESERVATIONS` · 503 |
 | POST | `/vehicles/{id}/maintenance/complete` | Bearer + `maintenance:update` | HU-FLEET-006 | 200 · 403 · 404 · 409 `NO_MAINTENANCE_IN_PROGRESS` |
 | GET | `/vehicles/stats` | Bearer + `vehicles:update` | HU-FLEET-006 | 200 (count per status) · 403 |
+| GET | `/maintenances?vehicleId=&status=` | Bearer + `maintenance:update` | Admin history | 200 (newest first, with plate, vehicle name and type) · 403 |
 | POST | `/internal/events` | — (internal network only) | — | 204 · 400 · 404 · 409 `INVALID_STATUS_TRANSITION` |
 
 Errors follow `ErrorResponse` from `_shared.yaml`: `{"error": "CODE", "message": "...", "details": [...]}`.

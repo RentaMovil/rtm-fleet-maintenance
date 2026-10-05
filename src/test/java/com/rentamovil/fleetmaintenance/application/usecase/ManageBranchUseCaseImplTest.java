@@ -54,7 +54,7 @@ class ManageBranchUseCaseImplTest {
     }
 
     private static BranchData data(List<OperatingHour> hours) {
-        return new BranchData(" Centro ", "10th Street # 5-20", "Bogota", "6011234567", hours);
+        return new BranchData(" Centro ", "10th Street # 5-20", "Bogota", "6011234567", null, null, hours);
     }
 
     @Test

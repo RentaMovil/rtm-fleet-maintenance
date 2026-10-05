@@ -1,11 +1,14 @@
 package com.rentamovil.fleetmaintenance.infrastructure.persistence.adapter;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.rentamovil.fleetmaintenance.domain.entity.Vehicle;
+import com.rentamovil.fleetmaintenance.domain.entity.VehicleSearchCriteria;
+import com.rentamovil.fleetmaintenance.domain.enums.VehicleStatus;
 import com.rentamovil.fleetmaintenance.domain.port.out.VehicleRepositoryPort;
 import com.rentamovil.fleetmaintenance.infrastructure.persistence.repository.BranchJpaRepository;
 import com.rentamovil.fleetmaintenance.infrastructure.persistence.repository.VehicleJpaRepository;
@@ -44,6 +47,14 @@ public class VehicleRepositoryAdapter implements VehicleRepositoryPort {
     @Override
     public boolean existsByPlate(String plate) {
         return vehicleJpaRepository.existsByPlate(plate);
+    }
+
+    @Override
+    public List<Vehicle> searchAvailable(VehicleSearchCriteria criteria) {
+        return vehicleJpaRepository.search(VehicleStatus.AVAILABLE.name(),
+                        criteria.getBranchId(), criteria.getCategoryId(), criteria.getBrandId(),
+                        criteria.getEngineTypeId(), criteria.getMinPrice(), criteria.getMaxPrice())
+                .stream().map(PersistenceMapper::toDomain).toList();
     }
 
     @Override

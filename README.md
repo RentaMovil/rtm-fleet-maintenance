@@ -88,6 +88,7 @@ docker compose up -d --build
 | Method | Path | Auth | Story | Responses |
 |---|---|---|---|---|
 | GET | `/health` | — | — | 200 / 503 |
+| GET | `/brands`, `/categories`, `/engine-types`, `/vehicle-models`, `/maintenance-types` | — | — | 200 |
 
 Errors follow `ErrorResponse` from `_shared.yaml`: `{"error": "CODE", "message": "...", "details": [...]}`.
 

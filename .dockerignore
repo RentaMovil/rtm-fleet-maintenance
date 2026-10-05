@@ -1,0 +1,11 @@
+# Never copied into the image: secrets, local builds, IDE files
+.env
+target/
+bin/
+.git/
+.idea/
+.vscode/
+*.iml
+.project
+.classpath
+.settings/

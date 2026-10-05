@@ -11,6 +11,7 @@ API contract: `rtm-docs/07-api/contracts/openapi/fleet-maintenance.yaml`.
 | Database | SQL Server `rentamovil`, schema `fleet`, user `fleet_app` |
 | Migrations | **not here** — they live in `rtm-fleet-maintenance-db` (Liquibase) |
 | Depends on | `iam` (public key at `/jwks` to verify tokens) |
+| Calls | `booking-reservation` (`GET /internal/reservations/vehicle-occupancy`) |
 
 ## Layout (hexagonal)
 
@@ -93,6 +94,9 @@ docker compose up -d --build
 | POST | `/branches` | Bearer + `branches:manage` | HU-FLEET-007 | 201 · 400 `VALIDATION_ERROR` · 403 |
 | PUT | `/branches/{id}` | Bearer + `branches:manage` | HU-FLEET-007 | 200 · 400 · 403 · 404 |
 | DELETE | `/branches/{id}` | Bearer + `branches:manage` | HU-FLEET-007 | 204 · 403 · 404 · 409 `BRANCH_HAS_VEHICLES` / `RESOURCE_IN_USE` |
+| GET | `/vehicles?dateFrom&dateTo&branchId&categoryId&brandId&engineTypeId&minPrice&maxPrice&page&limit` | — | HU-FLEET-001, 003 | 200 (paged, AVAILABLE only) · 400 · 503 `BOOKING_UNAVAILABLE` |
+| GET | `/vehicles/{id}` | — | HU-FLEET-001, 002 | 200 · 404 |
+| GET | `/vehicles/{id}/availability?from&to` | — | HU-FLEET-002 | 200 `{"available": ...}` · 400 · 404 · 503 |
 | POST | `/vehicles` | Bearer + `vehicles:create` | HU-FLEET-004 | 201 (always `AVAILABLE`) · 400 · 403 · 409 `PLATE_ALREADY_EXISTS` |
 | PUT | `/vehicles/{id}` | Bearer + `vehicles:update` | HU-FLEET-005 | 200 · 400 · 403 · 404 · 409 `PLATE_ALREADY_EXISTS` / `MILEAGE_CANNOT_DECREASE` / `VEHICLE_RETIRED` |
 
@@ -104,6 +108,11 @@ Endpoints with Bearer receive the caller through `@CurrentUser AuthenticatedUser
 
 Branches always carry the 7 weekdays (`1` = Monday … `7` = Sunday). A closed day is
 `{"dayOfWeek": 7, "closed": true}` and has no row in `fleet.branch_operating_hour`.
+
+**Availability** is never stored here: reservations belong to `booking-reservation`, which is
+asked synchronously for every vehicle (`/internal/reservations/vehicle-occupancy`, no JWT, internal
+network). If it's down, date-filtered searches, availability checks and retiring answer `503`
+instead of guessing (`decisions.md`).
 
 Every change is recorded in `shared.audit` (`BRANCH_CREATED`, `VEHICLE_REGISTERED`,
 `VEHICLE_SENT_TO_MAINTENANCE`, ...).

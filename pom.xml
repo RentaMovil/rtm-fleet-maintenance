@@ -15,6 +15,7 @@
 	<description>RentaMovil Fleet &amp; Maintenance microservice</description>
 	<properties>
 		<java.version>21</java.version>
+		<nimbus-jose-jwt.version>10.10</nimbus-jose-jwt.version>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -33,6 +34,12 @@
 			<groupId>com.microsoft.sqlserver</groupId>
 			<artifactId>mssql-jdbc</artifactId>
 			<scope>runtime</scope>
+		</dependency>
+		<!-- Only to VERIFY iam JWTs (RS256, public key from /jwks). This service never signs tokens -->
+		<dependency>
+			<groupId>com.nimbusds</groupId>
+			<artifactId>nimbus-jose-jwt</artifactId>
+			<version>${nimbus-jose-jwt.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.projectlombok</groupId>

@@ -13,6 +13,7 @@ import com.rentamovil.fleetmaintenance.application.usecase.GetVehicleStatsUseCas
 import com.rentamovil.fleetmaintenance.application.usecase.GetVehicleUseCaseImpl;
 import com.rentamovil.fleetmaintenance.application.usecase.HandleRentalEventUseCaseImpl;
 import com.rentamovil.fleetmaintenance.application.usecase.ListBranchesUseCaseImpl;
+import com.rentamovil.fleetmaintenance.application.usecase.ListMaintenancesUseCaseImpl;
 import com.rentamovil.fleetmaintenance.application.usecase.ListReferenceDataUseCaseImpl;
 import com.rentamovil.fleetmaintenance.application.usecase.ManageBranchUseCaseImpl;
 import com.rentamovil.fleetmaintenance.application.usecase.RegisterVehicleUseCaseImpl;
@@ -26,6 +27,7 @@ import com.rentamovil.fleetmaintenance.domain.port.in.GetVehicleStatsUseCase;
 import com.rentamovil.fleetmaintenance.domain.port.in.GetVehicleUseCase;
 import com.rentamovil.fleetmaintenance.domain.port.in.HandleRentalEventUseCase;
 import com.rentamovil.fleetmaintenance.domain.port.in.ListBranchesUseCase;
+import com.rentamovil.fleetmaintenance.domain.port.in.ListMaintenancesUseCase;
 import com.rentamovil.fleetmaintenance.domain.port.in.ListReferenceDataUseCase;
 import com.rentamovil.fleetmaintenance.domain.port.in.ManageBranchUseCase;
 import com.rentamovil.fleetmaintenance.domain.port.in.RegisterVehicleUseCase;
@@ -116,6 +118,11 @@ public class BeanConfig {
     @Bean
     public GetVehicleStatsUseCase getVehicleStatsUseCase(VehicleRepositoryPort vehicleRepositoryPort) {
         return new GetVehicleStatsUseCaseImpl(vehicleRepositoryPort);
+    }
+
+    @Bean
+    public ListMaintenancesUseCase listMaintenancesUseCase(VehicleMaintenanceRepositoryPort vehicleMaintenanceRepositoryPort) {
+        return new ListMaintenancesUseCaseImpl(vehicleMaintenanceRepositoryPort);
     }
 
     @Bean

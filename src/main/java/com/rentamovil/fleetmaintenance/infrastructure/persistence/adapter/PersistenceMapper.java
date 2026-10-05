@@ -111,6 +111,8 @@ public final class PersistenceMapper {
                 .address(entity.getAddress())
                 .city(entity.getCity())
                 .phone(entity.getPhone())
+                .latitude(entity.getLatitude())
+                .longitude(entity.getLongitude())
                 .operatingHours(week)
                 .build();
     }
@@ -122,6 +124,8 @@ public final class PersistenceMapper {
         entity.setAddress(branch.getAddress());
         entity.setCity(branch.getCity());
         entity.setPhone(branch.getPhone());
+        entity.setLatitude(branch.getLatitude());
+        entity.setLongitude(branch.getLongitude());
     }
 
     // Only open days get a row (opens_at and closes_at are NOT NULL)

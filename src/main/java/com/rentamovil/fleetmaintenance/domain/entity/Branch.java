@@ -1,5 +1,6 @@
 package com.rentamovil.fleetmaintenance.domain.entity;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,6 +22,9 @@ public class Branch {
     private String address;
     private String city;
     private String phone;
+    // Map position (WGS84). Optional: branches created before the map have none
+    private BigDecimal latitude;
+    private BigDecimal longitude;
 
     // Always the 7 days, Monday to Sunday (closed ones with closed = true)
     @Builder.Default

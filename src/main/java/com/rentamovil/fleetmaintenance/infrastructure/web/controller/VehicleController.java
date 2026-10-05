@@ -2,11 +2,13 @@ package com.rentamovil.fleetmaintenance.infrastructure.web.controller;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Map;
 
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.format.annotation.DateTimeFormat.ISO;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -18,13 +20,19 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.rentamovil.fleetmaintenance.domain.entity.AuthenticatedUser;
 import com.rentamovil.fleetmaintenance.domain.entity.VehicleSearchCriteria;
+import com.rentamovil.fleetmaintenance.domain.enums.VehicleStatus;
+import com.rentamovil.fleetmaintenance.domain.port.in.ChangeVehicleStatusUseCase;
 import com.rentamovil.fleetmaintenance.domain.port.in.CheckVehicleAvailabilityUseCase;
+import com.rentamovil.fleetmaintenance.domain.port.in.CompleteMaintenanceUseCase;
+import com.rentamovil.fleetmaintenance.domain.port.in.GetVehicleStatsUseCase;
 import com.rentamovil.fleetmaintenance.domain.port.in.GetVehicleUseCase;
 import com.rentamovil.fleetmaintenance.domain.port.in.RegisterVehicleUseCase;
 import com.rentamovil.fleetmaintenance.domain.port.in.SearchVehiclesUseCase;
 import com.rentamovil.fleetmaintenance.domain.port.in.UpdateVehicleUseCase;
 import com.rentamovil.fleetmaintenance.infrastructure.web.auth.CurrentUser;
 import com.rentamovil.fleetmaintenance.infrastructure.web.dto.AvailabilityResponse;
+import com.rentamovil.fleetmaintenance.infrastructure.web.dto.ChangeVehicleStatusRequest;
+import com.rentamovil.fleetmaintenance.infrastructure.web.dto.CompleteMaintenanceRequest;
 import com.rentamovil.fleetmaintenance.infrastructure.web.dto.VehiclePageResponse;
 import com.rentamovil.fleetmaintenance.infrastructure.web.dto.VehicleResponse;
 import com.rentamovil.fleetmaintenance.infrastructure.web.dto.VehicleWriteRequest;
@@ -44,6 +52,9 @@ public class VehicleController {
     private final CheckVehicleAvailabilityUseCase checkVehicleAvailabilityUseCase;
     private final RegisterVehicleUseCase registerVehicleUseCase;
     private final UpdateVehicleUseCase updateVehicleUseCase;
+    private final ChangeVehicleStatusUseCase changeVehicleStatusUseCase;
+    private final CompleteMaintenanceUseCase completeMaintenanceUseCase;
+    private final GetVehicleStatsUseCase getVehicleStatsUseCase;
 
     @GetMapping
     public VehiclePageResponse search(@RequestParam(required = false) @DateTimeFormat(iso = ISO.DATE) LocalDate dateFrom,
@@ -63,6 +74,12 @@ public class VehicleController {
                 .page(page).limit(limit)
                 .build();
         return VehiclePageResponse.from(searchVehiclesUseCase.search(criteria));
+    }
+
+    // Placed before /{id} only for readability: Spring always prefers the literal path
+    @GetMapping("/stats")
+    public Map<VehicleStatus, Long> stats(@CurrentUser AuthenticatedUser currentUser) {
+        return getVehicleStatsUseCase.getStats(currentUser);
     }
 
     @GetMapping("/{id}")
@@ -89,5 +106,22 @@ public class VehicleController {
                                   @PathVariable Integer id,
                                   @Valid @RequestBody VehicleWriteRequest request) {
         return VehicleResponse.from(updateVehicleUseCase.update(currentUser, id, request.toData()));
+    }
+
+    @PatchMapping("/{id}/status")
+    public VehicleResponse changeStatus(@CurrentUser AuthenticatedUser currentUser,
+                                        @PathVariable Integer id,
+                                        @Valid @RequestBody ChangeVehicleStatusRequest request) {
+        return VehicleResponse.from(changeVehicleStatusUseCase.changeStatus(currentUser, id,
+                VehicleStatus.valueOf(request.getStatus()), request.getMaintenanceTypeId()));
+    }
+
+    // The body is optional: without it the maintenance is closed with no cost
+    @PostMapping("/{id}/maintenance/complete")
+    public VehicleResponse completeMaintenance(@CurrentUser AuthenticatedUser currentUser,
+                                               @PathVariable Integer id,
+                                               @Valid @RequestBody(required = false) CompleteMaintenanceRequest request) {
+        return VehicleResponse.from(completeMaintenanceUseCase.complete(currentUser, id,
+                request == null ? null : request.getCost()));
     }
 }

@@ -60,6 +60,13 @@ public class VehicleRepositoryAdapter implements VehicleRepositoryPort {
     }
 
     @Override
+    public List<Vehicle> findInventory(VehicleStatus status, Integer branchId) {
+        return vehicleJpaRepository.search(status == null ? null : status.name(), branchId,
+                        null, null, null, null, null)
+                .stream().map(PersistenceMapper::toDomain).toList();
+    }
+
+    @Override
     public Map<VehicleStatus, Long> countByStatus() {
         Map<VehicleStatus, Long> counts = new EnumMap<>(VehicleStatus.class);
         for (Object[] row : vehicleJpaRepository.countGroupedByStatus()) {

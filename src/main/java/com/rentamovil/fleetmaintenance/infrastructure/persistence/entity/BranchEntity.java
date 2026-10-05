@@ -1,5 +1,6 @@
 package com.rentamovil.fleetmaintenance.infrastructure.persistence.entity;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,6 +40,12 @@ public class BranchEntity {
 
     @Column(name = "phone", length = 20)
     private String phone;
+
+    @Column(name = "latitude", precision = 10, scale = 8)
+    private BigDecimal latitude;
+
+    @Column(name = "longitude", precision = 11, scale = 8)
+    private BigDecimal longitude;
 
     // Removing a day from the list deletes its row (orphanRemoval)
     @OneToMany(mappedBy = "branch", cascade = CascadeType.ALL, orphanRemoval = true)

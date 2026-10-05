@@ -2,6 +2,7 @@ package com.rentamovil.fleetmaintenance.infrastructure.web.controller;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.format.annotation.DateTimeFormat;
@@ -26,6 +27,7 @@ import com.rentamovil.fleetmaintenance.domain.port.in.CheckVehicleAvailabilityUs
 import com.rentamovil.fleetmaintenance.domain.port.in.CompleteMaintenanceUseCase;
 import com.rentamovil.fleetmaintenance.domain.port.in.GetVehicleStatsUseCase;
 import com.rentamovil.fleetmaintenance.domain.port.in.GetVehicleUseCase;
+import com.rentamovil.fleetmaintenance.domain.port.in.ListInventoryUseCase;
 import com.rentamovil.fleetmaintenance.domain.port.in.RegisterVehicleUseCase;
 import com.rentamovil.fleetmaintenance.domain.port.in.SearchVehiclesUseCase;
 import com.rentamovil.fleetmaintenance.domain.port.in.UpdateVehicleUseCase;
@@ -55,6 +57,7 @@ public class VehicleController {
     private final ChangeVehicleStatusUseCase changeVehicleStatusUseCase;
     private final CompleteMaintenanceUseCase completeMaintenanceUseCase;
     private final GetVehicleStatsUseCase getVehicleStatsUseCase;
+    private final ListInventoryUseCase listInventoryUseCase;
 
     @GetMapping
     public VehiclePageResponse search(@RequestParam(required = false) @DateTimeFormat(iso = ISO.DATE) LocalDate dateFrom,
@@ -80,6 +83,16 @@ public class VehicleController {
     @GetMapping("/stats")
     public Map<VehicleStatus, Long> stats(@CurrentUser AuthenticatedUser currentUser) {
         return getVehicleStatsUseCase.getStats(currentUser);
+    }
+
+    // Admin inventory: every status, not paged (the fleet is small)
+    @GetMapping("/inventory")
+    public List<VehicleResponse> inventory(@CurrentUser AuthenticatedUser currentUser,
+                                           @RequestParam(required = false) VehicleStatus status,
+                                           @RequestParam(required = false) Integer branchId) {
+        return listInventoryUseCase.list(currentUser, status, branchId).stream()
+                .map(VehicleResponse::from)
+                .toList();
     }
 
     @GetMapping("/{id}")

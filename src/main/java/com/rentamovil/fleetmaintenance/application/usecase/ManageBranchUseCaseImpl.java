@@ -79,6 +79,8 @@ public class ManageBranchUseCaseImpl implements ManageBranchUseCase {
                 .address(data.address().trim())
                 .city(data.city().trim())
                 .phone(data.phone() == null ? null : data.phone().trim())
+                .latitude(data.latitude())
+                .longitude(data.longitude())
                 .operatingHours(validateWeek(data.operatingHours()))
                 .build();
     }

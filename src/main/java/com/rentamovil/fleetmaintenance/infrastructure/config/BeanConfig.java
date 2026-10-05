@@ -12,9 +12,12 @@ import com.rentamovil.fleetmaintenance.application.usecase.CompleteMaintenanceUs
 import com.rentamovil.fleetmaintenance.application.usecase.GetVehicleStatsUseCaseImpl;
 import com.rentamovil.fleetmaintenance.application.usecase.GetVehicleUseCaseImpl;
 import com.rentamovil.fleetmaintenance.application.usecase.HandleRentalEventUseCaseImpl;
+import com.rentamovil.fleetmaintenance.application.usecase.ListMaintenancesUseCaseImpl;
 import com.rentamovil.fleetmaintenance.application.usecase.ListBranchesUseCaseImpl;
 import com.rentamovil.fleetmaintenance.application.usecase.ListReferenceDataUseCaseImpl;
+import com.rentamovil.fleetmaintenance.application.usecase.MaintenanceLifecycle;
 import com.rentamovil.fleetmaintenance.application.usecase.ManageBranchUseCaseImpl;
+import com.rentamovil.fleetmaintenance.application.usecase.ManageMaintenanceUseCaseImpl;
 import com.rentamovil.fleetmaintenance.application.usecase.RegisterVehicleUseCaseImpl;
 import com.rentamovil.fleetmaintenance.application.usecase.SearchVehiclesUseCaseImpl;
 import com.rentamovil.fleetmaintenance.application.usecase.UpdateVehicleUseCaseImpl;
@@ -26,8 +29,10 @@ import com.rentamovil.fleetmaintenance.domain.port.in.GetVehicleStatsUseCase;
 import com.rentamovil.fleetmaintenance.domain.port.in.GetVehicleUseCase;
 import com.rentamovil.fleetmaintenance.domain.port.in.HandleRentalEventUseCase;
 import com.rentamovil.fleetmaintenance.domain.port.in.ListBranchesUseCase;
+import com.rentamovil.fleetmaintenance.domain.port.in.ListMaintenancesUseCase;
 import com.rentamovil.fleetmaintenance.domain.port.in.ListReferenceDataUseCase;
 import com.rentamovil.fleetmaintenance.domain.port.in.ManageBranchUseCase;
+import com.rentamovil.fleetmaintenance.domain.port.in.ManageMaintenanceUseCase;
 import com.rentamovil.fleetmaintenance.domain.port.in.RegisterVehicleUseCase;
 import com.rentamovil.fleetmaintenance.domain.port.in.SearchVehiclesUseCase;
 import com.rentamovil.fleetmaintenance.domain.port.in.UpdateVehicleUseCase;
@@ -87,18 +92,28 @@ public class BeanConfig {
         return new UpdateVehicleUseCaseImpl(vehicleRepositoryPort, vehicleDataResolver, auditPort);
     }
 
+    // The maintenance transitions that also move the vehicle, shared by the vehicle and /maintenances use cases
+    @Bean
+    public MaintenanceLifecycle maintenanceLifecycle(VehicleRepositoryPort vehicleRepositoryPort,
+                                                     VehicleMaintenanceRepositoryPort vehicleMaintenanceRepositoryPort,
+                                                     EventPublisherPort eventPublisherPort,
+                                                     AuditPort auditPort,
+                                                     Clock clock) {
+        return new MaintenanceLifecycle(vehicleRepositoryPort, vehicleMaintenanceRepositoryPort, eventPublisherPort,
+                auditPort, clock);
+    }
+
     @Bean
     public ChangeVehicleStatusUseCase changeVehicleStatusUseCase(
             VehicleRepositoryPort vehicleRepositoryPort,
             VehicleMaintenanceRepositoryPort vehicleMaintenanceRepositoryPort,
             ReferenceDataRepositoryPort referenceDataRepositoryPort,
             ReservationOccupancyPort reservationOccupancyPort,
-            EventPublisherPort eventPublisherPort,
+            MaintenanceLifecycle maintenanceLifecycle,
             AuditPort auditPort,
-            Clock clock,
             @Value("${app.fleet.retire-reservation-horizon-days}") long retireReservationHorizonDays) {
         return new ChangeVehicleStatusUseCaseImpl(vehicleRepositoryPort, vehicleMaintenanceRepositoryPort,
-                referenceDataRepositoryPort, reservationOccupancyPort, eventPublisherPort, auditPort, clock,
+                referenceDataRepositoryPort, reservationOccupancyPort, maintenanceLifecycle, auditPort,
                 retireReservationHorizonDays);
     }
 
@@ -106,11 +121,25 @@ public class BeanConfig {
     public CompleteMaintenanceUseCase completeMaintenanceUseCase(
             VehicleRepositoryPort vehicleRepositoryPort,
             VehicleMaintenanceRepositoryPort vehicleMaintenanceRepositoryPort,
-            EventPublisherPort eventPublisherPort,
-            AuditPort auditPort,
-            Clock clock) {
+            MaintenanceLifecycle maintenanceLifecycle) {
         return new CompleteMaintenanceUseCaseImpl(vehicleRepositoryPort, vehicleMaintenanceRepositoryPort,
-                eventPublisherPort, auditPort, clock);
+                maintenanceLifecycle);
+    }
+
+    @Bean
+    public ManageMaintenanceUseCase manageMaintenanceUseCase(
+            VehicleRepositoryPort vehicleRepositoryPort,
+            VehicleMaintenanceRepositoryPort vehicleMaintenanceRepositoryPort,
+            ReferenceDataRepositoryPort referenceDataRepositoryPort,
+            MaintenanceLifecycle maintenanceLifecycle,
+            AuditPort auditPort) {
+        return new ManageMaintenanceUseCaseImpl(vehicleRepositoryPort, vehicleMaintenanceRepositoryPort,
+                referenceDataRepositoryPort, maintenanceLifecycle, auditPort);
+    }
+
+    @Bean
+    public ListMaintenancesUseCase listMaintenancesUseCase(VehicleMaintenanceRepositoryPort vehicleMaintenanceRepositoryPort) {
+        return new ListMaintenancesUseCaseImpl(vehicleMaintenanceRepositoryPort);
     }
 
     @Bean

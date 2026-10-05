@@ -76,6 +76,8 @@ public final class PersistenceMapper {
                 .startDate(entity.getStartDate())
                 .endDate(entity.getEndDate())
                 .cost(entity.getCost())
+                .observations(entity.getObservations())
+                .imageUrl(entity.getImageUrl())
                 .status(MaintenanceStatus.valueOf(entity.getStatus()))
                 .build();
     }
@@ -88,6 +90,8 @@ public final class PersistenceMapper {
         entity.setStartDate(maintenance.getStartDate());
         entity.setEndDate(maintenance.getEndDate());
         entity.setCost(maintenance.getCost());
+        entity.setObservations(maintenance.getObservations());
+        entity.setImageUrl(maintenance.getImageUrl());
         entity.setStatus(maintenance.getStatus().name());
         return entity;
     }
@@ -111,6 +115,8 @@ public final class PersistenceMapper {
                 .address(entity.getAddress())
                 .city(entity.getCity())
                 .phone(entity.getPhone())
+                .latitude(entity.getLatitude())
+                .longitude(entity.getLongitude())
                 .operatingHours(week)
                 .build();
     }
@@ -122,6 +128,8 @@ public final class PersistenceMapper {
         entity.setAddress(branch.getAddress());
         entity.setCity(branch.getCity());
         entity.setPhone(branch.getPhone());
+        entity.setLatitude(branch.getLatitude());
+        entity.setLongitude(branch.getLongitude());
     }
 
     // Only open days get a row (opens_at and closes_at are NOT NULL)

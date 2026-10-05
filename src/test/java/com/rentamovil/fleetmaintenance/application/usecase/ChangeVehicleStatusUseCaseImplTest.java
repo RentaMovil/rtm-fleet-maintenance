@@ -12,6 +12,7 @@ import java.time.Clock;
 import java.time.Instant;
 import java.time.LocalDate;
 import java.time.ZoneOffset;
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -61,7 +62,9 @@ class ChangeVehicleStatusUseCaseImplTest {
         Clock clock = Clock.fixed(Instant.parse("2026-10-02T15:00:00Z"), ZoneOffset.UTC);
         changeVehicleStatusUseCase = new ChangeVehicleStatusUseCaseImpl(vehicleRepositoryPort,
                 vehicleMaintenanceRepositoryPort, referenceDataRepositoryPort, reservationOccupancyPort,
-                eventPublisherPort, auditPort, clock, 730);
+                new MaintenanceLifecycle(vehicleRepositoryPort, vehicleMaintenanceRepositoryPort, eventPublisherPort,
+                        auditPort, clock),
+                auditPort, 730);
     }
 
     @Test
@@ -139,17 +142,19 @@ class ChangeVehicleStatusUseCaseImplTest {
     }
 
     @Test
-    void retiringFromMaintenanceClosesItWithoutEvent() {
+    void retiringFromMaintenanceCancelsItWithoutEvent() {
         VehicleMaintenance inProgress = VehicleMaintenance.builder().id(30).vehicleId(5)
                 .status(MaintenanceStatus.IN_PROGRESS).startDate(TODAY.minusDays(3)).build();
         when(vehicleRepositoryPort.findById(5)).thenReturn(Optional.of(TestData.vehicle(5, VehicleStatus.MAINTENANCE)));
-        when(vehicleMaintenanceRepositoryPort.findInProgressByVehicleId(5)).thenReturn(Optional.of(inProgress));
+        when(vehicleMaintenanceRepositoryPort.findOpenByVehicleId(5)).thenReturn(List.of(inProgress));
         when(vehicleMaintenanceRepositoryPort.save(any())).thenAnswer(inv -> inv.getArgument(0));
         when(vehicleRepositoryPort.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
-        changeVehicleStatusUseCase.changeStatus(TestData.ADMIN, 5, VehicleStatus.RETIRED, null);
+        Vehicle result = changeVehicleStatusUseCase.changeStatus(TestData.ADMIN, 5, VehicleStatus.RETIRED, null);
 
-        assertThat(inProgress.getStatus()).isEqualTo(MaintenanceStatus.COMPLETED);
+        //VehicleMaintenance.INV-007: cancelled, not completed; and the vehicle stays RETIRED
+        assertThat(inProgress.getStatus()).isEqualTo(MaintenanceStatus.CANCELLED);
+        assertThat(result.getStatus()).isEqualTo(VehicleStatus.RETIRED);
         assertThat(inProgress.getEndDate()).isEqualTo(TODAY);
         verify(eventPublisherPort, never()).publish(any());
     }

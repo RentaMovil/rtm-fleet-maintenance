@@ -1,5 +1,6 @@
 package com.rentamovil.fleetmaintenance.application.usecase;
 
+import java.math.BigDecimal;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
@@ -73,14 +74,25 @@ public class ManageBranchUseCaseImpl implements ManageBranchUseCase {
     }
 
     private static Branch toBranch(Integer id, BranchData data) {
+        validateCoordinates(data.latitude(), data.longitude());
         return Branch.builder()
                 .id(id)
                 .name(data.name().trim())
                 .address(data.address().trim())
                 .city(data.city().trim())
                 .phone(data.phone() == null ? null : data.phone().trim())
+                .latitude(data.latitude())
+                .longitude(data.longitude())
                 .operatingHours(validateWeek(data.operatingHours()))
                 .build();
+    }
+
+    // Half a location can't be drawn on a map (Branch.INV-001). Ranges are checked by the request DTO.
+    static void validateCoordinates(BigDecimal latitude, BigDecimal longitude) {
+        if ((latitude == null) != (longitude == null)) {
+            throw new InvalidDataException(latitude == null ? "latitude" : "longitude",
+                    "latitude and longitude go together: send both or neither");
+        }
     }
 
     // Exactly the 7 days, one per day (BranchOperatingHour.INV-002), and every open day

@@ -9,4 +9,7 @@ public interface ManageBranchUseCase {
     Branch create(AuthenticatedUser caller, BranchData data);
 
     Branch update(AuthenticatedUser caller, Integer branchId, BranchData data);
+
+    // Can't be deleted while it has vehicles assigned (HU-FLEET-007 scenario 2)
+    void delete(AuthenticatedUser caller, Integer branchId);
 }

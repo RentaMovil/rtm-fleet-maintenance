@@ -12,6 +12,7 @@ import com.rentamovil.fleetmaintenance.domain.port.in.ManageBranchUseCase;
 import com.rentamovil.fleetmaintenance.domain.port.out.AuditPort;
 import com.rentamovil.fleetmaintenance.domain.port.out.BranchRepositoryPort;
 import com.rentamovil.fleetmaintenance.domain.port.out.ReferenceDataRepositoryPort;
+import com.rentamovil.fleetmaintenance.domain.port.out.VehicleRepositoryPort;
 
 // Wires the use cases to their adapters.
 // Use cases have no @Service so the domain doesn't depend on Spring.
@@ -25,8 +26,9 @@ public class BeanConfig {
 
     @Bean
     public ManageBranchUseCase manageBranchUseCase(BranchRepositoryPort branchRepositoryPort,
+                                                   VehicleRepositoryPort vehicleRepositoryPort,
                                                    AuditPort auditPort) {
-        return new ManageBranchUseCaseImpl(branchRepositoryPort, auditPort);
+        return new ManageBranchUseCaseImpl(branchRepositoryPort, vehicleRepositoryPort, auditPort);
     }
 
     @Bean

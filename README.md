@@ -92,6 +92,7 @@ docker compose up -d --build
 | GET | `/branches` | — | HU-FLEET-007 | 200 (with the 7 days of operating hours) |
 | POST | `/branches` | Bearer + `branches:manage` | HU-FLEET-007 | 201 · 400 `VALIDATION_ERROR` · 403 |
 | PUT | `/branches/{id}` | Bearer + `branches:manage` | HU-FLEET-007 | 200 · 400 · 403 · 404 |
+| DELETE | `/branches/{id}` | Bearer + `branches:manage` | HU-FLEET-007 | 204 · 403 · 404 · 409 `BRANCH_HAS_VEHICLES` / `RESOURCE_IN_USE` |
 
 Errors follow `ErrorResponse` from `_shared.yaml`: `{"error": "CODE", "message": "...", "details": [...]}`.
 

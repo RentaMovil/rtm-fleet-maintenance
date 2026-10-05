@@ -89,12 +89,21 @@ docker compose up -d --build
 |---|---|---|---|---|
 | GET | `/health` | — | — | 200 / 503 |
 | GET | `/brands`, `/categories`, `/engine-types`, `/vehicle-models`, `/maintenance-types` | — | — | 200 |
+| GET | `/branches` | — | HU-FLEET-007 | 200 (with the 7 days of operating hours) |
+| POST | `/branches` | Bearer + `branches:manage` | HU-FLEET-007 | 201 · 400 `VALIDATION_ERROR` · 403 |
+| PUT | `/branches/{id}` | Bearer + `branches:manage` | HU-FLEET-007 | 200 · 400 · 403 · 404 |
 
 Errors follow `ErrorResponse` from `_shared.yaml`: `{"error": "CODE", "message": "...", "details": [...]}`.
 
 Endpoints with Bearer receive the caller through `@CurrentUser AuthenticatedUser`: the token is
 **verified again here** with iam's public key (RS256, `/jwks`), never trusted from the gateway's
 `X-User-*` headers, and each use case checks the permission it needs (`07-api/authentication.md`).
+
+Branches always carry the 7 weekdays (`1` = Monday … `7` = Sunday). A closed day is
+`{"dayOfWeek": 7, "closed": true}` and has no row in `fleet.branch_operating_hour`.
+
+Every change is recorded in `shared.audit` (`BRANCH_CREATED`, `VEHICLE_REGISTERED`,
+`VEHICLE_SENT_TO_MAINTENANCE`, ...).
 
 ## Branches
 

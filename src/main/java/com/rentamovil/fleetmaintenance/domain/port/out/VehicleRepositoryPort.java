@@ -3,6 +3,7 @@ package com.rentamovil.fleetmaintenance.domain.port.out;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import com.rentamovil.fleetmaintenance.domain.entity.Vehicle;
 import com.rentamovil.fleetmaintenance.domain.entity.VehicleSearchCriteria;
@@ -19,9 +20,9 @@ public interface VehicleRepositoryPort {
 
     boolean existsByPlate(String plate);
 
-    // AVAILABLE vehicles matching the catalog filters (except dates: booking-reservation
+    // Vehicles in those statuses matching the filters (except dates: booking-reservation
     // resolves those). Ordered by id so paging is stable.
-    List<Vehicle> searchAvailable(VehicleSearchCriteria criteria);
+    List<Vehicle> search(VehicleSearchCriteria criteria, Set<VehicleStatus> statuses);
 
     Map<VehicleStatus, Long> countByStatus();
 

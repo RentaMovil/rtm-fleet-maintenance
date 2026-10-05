@@ -4,6 +4,7 @@ import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -52,8 +53,8 @@ public class VehicleRepositoryAdapter implements VehicleRepositoryPort {
     }
 
     @Override
-    public List<Vehicle> searchAvailable(VehicleSearchCriteria criteria) {
-        return vehicleJpaRepository.search(VehicleStatus.AVAILABLE.name(),
+    public List<Vehicle> search(VehicleSearchCriteria criteria, Set<VehicleStatus> statuses) {
+        return vehicleJpaRepository.search(statuses.stream().map(Enum::name).toList(),
                         criteria.getBranchId(), criteria.getCategoryId(), criteria.getBrandId(),
                         criteria.getEngineTypeId(), criteria.getMinPrice(), criteria.getMaxPrice())
                 .stream().map(PersistenceMapper::toDomain).toList();

@@ -1,6 +1,8 @@
 package com.rentamovil.fleetmaintenance.infrastructure.persistence.adapter;
 
+import java.util.EnumMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.stereotype.Component;
@@ -55,6 +57,15 @@ public class VehicleRepositoryAdapter implements VehicleRepositoryPort {
                         criteria.getBranchId(), criteria.getCategoryId(), criteria.getBrandId(),
                         criteria.getEngineTypeId(), criteria.getMinPrice(), criteria.getMaxPrice())
                 .stream().map(PersistenceMapper::toDomain).toList();
+    }
+
+    @Override
+    public Map<VehicleStatus, Long> countByStatus() {
+        Map<VehicleStatus, Long> counts = new EnumMap<>(VehicleStatus.class);
+        for (Object[] row : vehicleJpaRepository.countGroupedByStatus()) {
+            counts.put(VehicleStatus.valueOf((String) row[0]), (Long) row[1]);
+        }
+        return counts;
     }
 
     @Override

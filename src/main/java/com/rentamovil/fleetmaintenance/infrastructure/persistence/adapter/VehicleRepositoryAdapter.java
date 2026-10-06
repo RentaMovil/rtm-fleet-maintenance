@@ -1,5 +1,6 @@
 package com.rentamovil.fleetmaintenance.infrastructure.persistence.adapter;
 
+import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
@@ -57,6 +58,16 @@ public class VehicleRepositoryAdapter implements VehicleRepositoryPort {
         return vehicleJpaRepository.search(statuses.stream().map(Enum::name).toList(),
                         criteria.getBranchId(), criteria.getCategoryId(), criteria.getBrandId(),
                         criteria.getEngineTypeId(), criteria.getMinPrice(), criteria.getMaxPrice())
+                .stream().map(PersistenceMapper::toDomain).toList();
+    }
+
+    @Override
+    public List<Vehicle> findInventory(VehicleStatus status, Integer branchId) {
+        //Without a status it's the whole fleet: the same query as the catalog, with every status
+        List<String> statuses = status == null
+                ? Arrays.stream(VehicleStatus.values()).map(Enum::name).toList()
+                : List.of(status.name());
+        return vehicleJpaRepository.search(statuses, branchId, null, null, null, null, null)
                 .stream().map(PersistenceMapper::toDomain).toList();
     }
 

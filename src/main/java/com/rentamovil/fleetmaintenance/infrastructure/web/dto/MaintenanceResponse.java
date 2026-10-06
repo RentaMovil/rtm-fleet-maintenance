@@ -3,15 +3,22 @@ package com.rentamovil.fleetmaintenance.infrastructure.web.dto;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 
-import com.rentamovil.fleetmaintenance.domain.entity.MaintenanceRecord;
+import com.rentamovil.fleetmaintenance.domain.entity.VehicleMaintenance;
 
-public record MaintenanceResponse(Integer id, Integer vehicleId, String plate, String vehicleName,
-                                  CatalogItemResponse maintenanceType, LocalDate startDate, LocalDate endDate,
-                                  BigDecimal cost, String status) {
+// Maintenance in fleet-maintenance.yaml
+public record MaintenanceResponse(Integer id, VehicleSummary vehicle, CatalogItemResponse maintenanceType,
+                                  LocalDate startDate, LocalDate endDate, BigDecimal cost, String observations,
+                                  String imageUrl, String status) {
 
-    public static MaintenanceResponse from(MaintenanceRecord record) {
-        return new MaintenanceResponse(record.getId(), record.getVehicleId(), record.getPlate(), record.getVehicleName(),
-                new CatalogItemResponse(record.getMaintenanceTypeId(), record.getMaintenanceTypeName()),
-                record.getStartDate(), record.getEndDate(), record.getCost(), record.getStatus().name());
+    public record VehicleSummary(Integer id, String plate, String brand, String model) {
+    }
+
+    public static MaintenanceResponse from(VehicleMaintenance maintenance) {
+        var vehicle = maintenance.getVehicle();
+        return new MaintenanceResponse(maintenance.getId(),
+                new VehicleSummary(vehicle.id(), vehicle.plate(), vehicle.brand(), vehicle.model()),
+                CatalogItemResponse.from(maintenance.getMaintenanceType()),
+                maintenance.getStartDate(), maintenance.getEndDate(), maintenance.getCost(),
+                maintenance.getObservations(), maintenance.getImageUrl(), maintenance.getStatus().name());
     }
 }

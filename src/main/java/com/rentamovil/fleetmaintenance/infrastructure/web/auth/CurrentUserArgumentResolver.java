@@ -35,6 +35,9 @@ public class CurrentUserArgumentResolver implements HandlerMethodArgumentResolve
                                   NativeWebRequest webRequest, WebDataBinderFactory binderFactory) {
         String authorization = webRequest.getHeader(HttpHeaders.AUTHORIZATION);
         if (authorization == null || !authorization.startsWith(BEARER)) {
+            if (!parameter.getParameterAnnotation(CurrentUser.class).required()) {
+                return null;
+            }
             throw new InvalidTokenException("Missing access token");
         }
         return tokenVerifierPort.verify(authorization.substring(BEARER.length()));

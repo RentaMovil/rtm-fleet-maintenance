@@ -42,6 +42,12 @@ public class VehicleMaintenanceEntity {
     @Column(name = "cost", precision = 10, scale = 2)
     private BigDecimal cost;
 
+    @Column(name = "observations", length = 500)
+    private String observations;
+
+    @Column(name = "image_url", length = 255)
+    private String imageUrl;
+
     @Column(name = "status", nullable = false, length = 30)
     private String status;
 }

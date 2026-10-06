@@ -35,7 +35,7 @@ public class BranchWriteRequest {
     @Size(max = 20)
     private String phone;
 
-    // Optional: without them the branch just doesn't show on the map
+    // Optional map location; both or neither (checked by the use case)
     @DecimalMin("-90")
     @DecimalMax("90")
     private BigDecimal latitude;

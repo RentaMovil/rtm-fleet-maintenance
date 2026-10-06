@@ -2,7 +2,9 @@ package com.rentamovil.fleetmaintenance.infrastructure.web.controller;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.EnumSet;
 import java.util.List;
+import java.util.Set;
 import java.util.Map;
 
 import org.springframework.format.annotation.DateTimeFormat;
@@ -22,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.rentamovil.fleetmaintenance.domain.entity.AuthenticatedUser;
 import com.rentamovil.fleetmaintenance.domain.entity.VehicleSearchCriteria;
 import com.rentamovil.fleetmaintenance.domain.enums.VehicleStatus;
+import com.rentamovil.fleetmaintenance.domain.exception.InvalidDataException;
 import com.rentamovil.fleetmaintenance.domain.port.in.ChangeVehicleStatusUseCase;
 import com.rentamovil.fleetmaintenance.domain.port.in.CheckVehicleAvailabilityUseCase;
 import com.rentamovil.fleetmaintenance.domain.port.in.CompleteMaintenanceUseCase;
@@ -60,7 +63,10 @@ public class VehicleController {
     private final ListInventoryUseCase listInventoryUseCase;
 
     @GetMapping
-    public VehiclePageResponse search(@RequestParam(required = false) @DateTimeFormat(iso = ISO.DATE) LocalDate dateFrom,
+    // No status (or AVAILABLE): public catalog. Any other status: admin listing, needs a token (use case)
+    public VehiclePageResponse search(@CurrentUser(required = false) AuthenticatedUser currentUser,
+                                      @RequestParam(required = false) String status,
+                                      @RequestParam(required = false) @DateTimeFormat(iso = ISO.DATE) LocalDate dateFrom,
                                       @RequestParam(required = false) @DateTimeFormat(iso = ISO.DATE) LocalDate dateTo,
                                       @RequestParam(required = false) Integer branchId,
                                       @RequestParam(required = false) Integer categoryId,
@@ -74,9 +80,10 @@ public class VehicleController {
                 .dateFrom(dateFrom).dateTo(dateTo)
                 .branchId(branchId).categoryId(categoryId).brandId(brandId).engineTypeId(engineTypeId)
                 .minPrice(minPrice).maxPrice(maxPrice)
+                .statuses(toStatuses(status))
                 .page(page).limit(limit)
                 .build();
-        return VehiclePageResponse.from(searchVehiclesUseCase.search(criteria));
+        return VehiclePageResponse.from(searchVehiclesUseCase.search(currentUser, criteria));
     }
 
     // Placed before /{id} only for readability: Spring always prefers the literal path
@@ -85,7 +92,7 @@ public class VehicleController {
         return getVehicleStatsUseCase.getStats(currentUser);
     }
 
-    // Admin inventory: every status, not paged (the fleet is small)
+    // Admin inventory: every status, not paged (the fleet is small). Same data as GET /vehicles?status=ALL
     @GetMapping("/inventory")
     public List<VehicleResponse> inventory(@CurrentUser AuthenticatedUser currentUser,
                                            @RequestParam(required = false) VehicleStatus status,
@@ -105,6 +112,21 @@ public class VehicleController {
                                              @RequestParam @DateTimeFormat(iso = ISO.DATE) LocalDate from,
                                              @RequestParam @DateTimeFormat(iso = ISO.DATE) LocalDate to) {
         return new AvailabilityResponse(checkVehicleAvailabilityUseCase.isAvailable(id, from, to));
+    }
+
+    // ALL = every status; empty = the catalog (AVAILABLE)
+    private static Set<VehicleStatus> toStatuses(String status) {
+        if (status == null || status.isBlank()) {
+            return Set.of();
+        }
+        if ("ALL".equals(status)) {
+            return EnumSet.allOf(VehicleStatus.class);
+        }
+        try {
+            return Set.of(VehicleStatus.valueOf(status));
+        } catch (IllegalArgumentException e) {
+            throw new InvalidDataException("status", "must be AVAILABLE, RENTED, MAINTENANCE, RETIRED or ALL");
+        }
     }
 
     @PostMapping

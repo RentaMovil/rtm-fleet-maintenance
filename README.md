@@ -90,11 +90,12 @@ docker compose up -d --build
 |---|---|---|---|---|
 | GET | `/health` | — | — | 200 / 503 |
 | GET | `/brands`, `/categories`, `/engine-types`, `/vehicle-models`, `/maintenance-types` | — | — | 200 |
-| GET | `/branches` | — | HU-FLEET-007 | 200 (with the 7 days of operating hours and optional `latitude`/`longitude` for the map) |
+| GET | `/branches` | — | HU-FLEET-007 | 200 (with the 7 days of operating hours and optional `latitude`/`longitude` for the map, both or neither) |
 | POST | `/branches` | Bearer + `branches:manage` | HU-FLEET-007 | 201 · 400 `VALIDATION_ERROR` · 403 |
 | PUT | `/branches/{id}` | Bearer + `branches:manage` | HU-FLEET-007 | 200 · 400 · 403 · 404 |
 | DELETE | `/branches/{id}` | Bearer + `branches:manage` | HU-FLEET-007 | 204 · 403 · 404 · 409 `BRANCH_HAS_VEHICLES` / `RESOURCE_IN_USE` |
 | GET | `/vehicles?dateFrom&dateTo&branchId&categoryId&brandId&engineTypeId&minPrice&maxPrice&page&limit` | — | HU-FLEET-001, 003 | 200 (paged, AVAILABLE only) · 400 · 503 `BOOKING_UNAVAILABLE` |
+| GET | `/vehicles?status=AVAILABLE\|RENTED\|MAINTENANCE\|RETIRED\|ALL` | Bearer + `vehicles:update` (any status but AVAILABLE) | HU-FLEET-006 | 200 (paged admin listing) · 400 (dates with a non-catalog status) · 401 · 403 |
 | GET | `/vehicles/{id}` | — | HU-FLEET-001, 002 | 200 · 404 |
 | GET | `/vehicles/{id}/availability?from&to` | — | HU-FLEET-002 | 200 `{"available": ...}` · 400 · 404 · 503 |
 | POST | `/vehicles` | Bearer + `vehicles:create` | HU-FLEET-004 | 201 (always `AVAILABLE`) · 400 · 403 · 409 `PLATE_ALREADY_EXISTS` |
@@ -103,7 +104,10 @@ docker compose up -d --build
 | POST | `/vehicles/{id}/maintenance/complete` | Bearer + `maintenance:update` | HU-FLEET-006 | 200 · 403 · 404 · 409 `NO_MAINTENANCE_IN_PROGRESS` |
 | GET | `/vehicles/inventory?status=&branchId=` | Bearer + `vehicles:update` | Admin inventory | 200 (every status, not paged) · 403 |
 | GET | `/vehicles/stats` | Bearer + `vehicles:update` | HU-FLEET-006 | 200 (count per status) · 403 |
-| GET | `/maintenances?vehicleId=&status=` | Bearer + `maintenance:update` | Admin history | 200 (newest first, with plate, vehicle name and type) · 403 |
+| GET | `/maintenances?vehicleId=&status=` | Bearer + `maintenance:update` | HU-FLEET-008 | 200 (newest first, with the vehicle's plate, brand and model and the type) · 403 |
+| POST | `/maintenances` | Bearer + `maintenance:update` | HU-FLEET-008 | 201 (`SCHEDULED` or `IN_PROGRESS`) · 400 · 403 · 404 · 409 `VEHICLE_RETIRED` / `VEHICLE_NOT_AVAILABLE` |
+| PATCH | `/maintenances/{id}` | Bearer + `maintenance:update` | HU-FLEET-008 | 200 (partial edit) · 400 · 403 · 404 · 409 `MAINTENANCE_CLOSED` |
+| PATCH | `/maintenances/{id}/status` | Bearer + `maintenance:update` | HU-FLEET-008 | 200 (start, complete or cancel) · 400 · 403 · 404 · 409 `INVALID_STATUS_TRANSITION` |
 | POST | `/internal/events` | — (internal network only) | — | 204 · 400 · 404 · 409 `INVALID_STATUS_TRANSITION` |
 
 Errors follow `ErrorResponse` from `_shared.yaml`: `{"error": "CODE", "message": "...", "details": [...]}`.

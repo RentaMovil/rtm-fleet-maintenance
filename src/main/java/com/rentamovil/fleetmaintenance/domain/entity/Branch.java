@@ -22,7 +22,8 @@ public class Branch {
     private String address;
     private String city;
     private String phone;
-    // Map position (WGS84). Optional: branches created before the map have none
+
+    // Map location: both or neither (Branch.INV-001)
     private BigDecimal latitude;
     private BigDecimal longitude;
 

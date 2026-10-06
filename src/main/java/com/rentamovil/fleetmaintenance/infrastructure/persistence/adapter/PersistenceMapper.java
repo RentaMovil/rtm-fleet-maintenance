@@ -76,6 +76,8 @@ public final class PersistenceMapper {
                 .startDate(entity.getStartDate())
                 .endDate(entity.getEndDate())
                 .cost(entity.getCost())
+                .observations(entity.getObservations())
+                .imageUrl(entity.getImageUrl())
                 .status(MaintenanceStatus.valueOf(entity.getStatus()))
                 .build();
     }
@@ -88,6 +90,8 @@ public final class PersistenceMapper {
         entity.setStartDate(maintenance.getStartDate());
         entity.setEndDate(maintenance.getEndDate());
         entity.setCost(maintenance.getCost());
+        entity.setObservations(maintenance.getObservations());
+        entity.setImageUrl(maintenance.getImageUrl());
         entity.setStatus(maintenance.getStatus().name());
         return entity;
     }

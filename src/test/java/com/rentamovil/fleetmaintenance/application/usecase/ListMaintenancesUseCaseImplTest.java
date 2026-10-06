@@ -16,7 +16,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.rentamovil.fleetmaintenance.domain.entity.AuthenticatedUser;
-import com.rentamovil.fleetmaintenance.domain.entity.MaintenanceRecord;
+import com.rentamovil.fleetmaintenance.domain.entity.VehicleMaintenance;
 import com.rentamovil.fleetmaintenance.domain.entity.Permissions;
 import com.rentamovil.fleetmaintenance.domain.enums.MaintenanceStatus;
 import com.rentamovil.fleetmaintenance.domain.exception.ForbiddenException;
@@ -34,8 +34,8 @@ class ListMaintenancesUseCaseImplTest {
     @Test
     void anAdminSeesTheFilteredHistory() {
         AuthenticatedUser admin = new AuthenticatedUser(1, "ADMIN", List.of(Permissions.MAINTENANCE_UPDATE));
-        MaintenanceRecord record = MaintenanceRecord.builder().id(7).vehicleId(3).status(MaintenanceStatus.IN_PROGRESS).build();
-        when(vehicleMaintenanceRepositoryPort.findHistory(3, MaintenanceStatus.IN_PROGRESS)).thenReturn(List.of(record));
+        VehicleMaintenance record = VehicleMaintenance.builder().id(7).vehicleId(3).status(MaintenanceStatus.IN_PROGRESS).build();
+        when(vehicleMaintenanceRepositoryPort.search(3, MaintenanceStatus.IN_PROGRESS)).thenReturn(List.of(record));
 
         assertThat(listMaintenancesUseCase.list(admin, 3, MaintenanceStatus.IN_PROGRESS)).containsExactly(record);
     }
@@ -46,6 +46,6 @@ class ListMaintenancesUseCaseImplTest {
 
         assertThatThrownBy(() -> listMaintenancesUseCase.list(client, null, null))
                 .isInstanceOf(ForbiddenException.class);
-        verify(vehicleMaintenanceRepositoryPort, never()).findHistory(any(), any());
+        verify(vehicleMaintenanceRepositoryPort, never()).search(any(), any());
     }
 }

@@ -50,7 +50,8 @@ class CompleteMaintenanceUseCaseImplTest {
     void setUp() {
         Clock clock = Clock.fixed(Instant.parse("2026-10-02T15:00:00Z"), ZoneOffset.UTC);
         completeMaintenanceUseCase = new CompleteMaintenanceUseCaseImpl(vehicleRepositoryPort,
-                vehicleMaintenanceRepositoryPort, eventPublisherPort, auditPort, clock);
+                vehicleMaintenanceRepositoryPort, new MaintenanceLifecycle(vehicleRepositoryPort,
+                        vehicleMaintenanceRepositoryPort, eventPublisherPort, auditPort, clock));
     }
 
     @Test
@@ -59,6 +60,7 @@ class CompleteMaintenanceUseCaseImplTest {
                 .status(MaintenanceStatus.IN_PROGRESS).startDate(LocalDate.of(2026, 9, 28)).build();
         when(vehicleRepositoryPort.findById(5)).thenReturn(Optional.of(TestData.vehicle(5, VehicleStatus.MAINTENANCE)));
         when(vehicleMaintenanceRepositoryPort.findInProgressByVehicleId(5)).thenReturn(Optional.of(inProgress));
+        when(vehicleMaintenanceRepositoryPort.save(any())).thenAnswer(inv -> inv.getArgument(0));
         when(vehicleRepositoryPort.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
         Vehicle result = completeMaintenanceUseCase.complete(TestData.ADMIN, 5, new BigDecimal("250000"));

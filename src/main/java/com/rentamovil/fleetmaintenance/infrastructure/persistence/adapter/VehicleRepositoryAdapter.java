@@ -1,9 +1,11 @@
 package com.rentamovil.fleetmaintenance.infrastructure.persistence.adapter;
 
+import java.util.Arrays;
 import java.util.EnumMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -52,8 +54,8 @@ public class VehicleRepositoryAdapter implements VehicleRepositoryPort {
     }
 
     @Override
-    public List<Vehicle> searchAvailable(VehicleSearchCriteria criteria) {
-        return vehicleJpaRepository.search(VehicleStatus.AVAILABLE.name(),
+    public List<Vehicle> search(VehicleSearchCriteria criteria, Set<VehicleStatus> statuses) {
+        return vehicleJpaRepository.search(statuses.stream().map(Enum::name).toList(),
                         criteria.getBranchId(), criteria.getCategoryId(), criteria.getBrandId(),
                         criteria.getEngineTypeId(), criteria.getMinPrice(), criteria.getMaxPrice())
                 .stream().map(PersistenceMapper::toDomain).toList();
@@ -61,8 +63,11 @@ public class VehicleRepositoryAdapter implements VehicleRepositoryPort {
 
     @Override
     public List<Vehicle> findInventory(VehicleStatus status, Integer branchId) {
-        return vehicleJpaRepository.search(status == null ? null : status.name(), branchId,
-                        null, null, null, null, null)
+        //Without a status it's the whole fleet: the same query as the catalog, with every status
+        List<String> statuses = status == null
+                ? Arrays.stream(VehicleStatus.values()).map(Enum::name).toList()
+                : List.of(status.name());
+        return vehicleJpaRepository.search(statuses, branchId, null, null, null, null, null)
                 .stream().map(PersistenceMapper::toDomain).toList();
     }
 

@@ -8,6 +8,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.math.BigDecimal;
 import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -55,6 +56,27 @@ class ManageBranchUseCaseImplTest {
 
     private static BranchData data(List<OperatingHour> hours) {
         return new BranchData(" Centro ", "10th Street # 5-20", "Bogota", "6011234567", null, null, hours);
+    }
+
+    @Test
+    void storesBothCoordinates() {
+        when(branchRepositoryPort.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
+        Branch result = manageBranchUseCase.create(TestData.ADMIN, new BranchData("Centro", "a", "Neiva", "1",
+                new BigDecimal("2.930321"), new BigDecimal("-75.266170"), week()));
+
+        assertThat(result.getLatitude()).isEqualByComparingTo("2.930321");
+        assertThat(result.getLongitude()).isEqualByComparingTo("-75.266170");
+    }
+
+    @Test
+    void halfALocationIsInvalid() {
+        BranchData onlyLatitude = new BranchData("Centro", "a", "Neiva", "1", new BigDecimal("2.93"), null, week());
+
+        assertThatThrownBy(() -> manageBranchUseCase.create(TestData.ADMIN, onlyLatitude))
+                .isInstanceOf(InvalidDataException.class)
+                .hasFieldOrPropertyWithValue("field", "longitude");
+        verify(branchRepositoryPort, never()).save(any());
     }
 
     @Test

@@ -2,6 +2,9 @@ package com.rentamovil.fleetmaintenance.domain.entity;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.Set;
+
+import com.rentamovil.fleetmaintenance.domain.enums.VehicleStatus;
 
 import lombok.Builder;
 import lombok.Getter;
@@ -19,6 +22,8 @@ public class VehicleSearchCriteria {
     private Integer engineTypeId;
     private BigDecimal minPrice;
     private BigDecimal maxPrice;
+    // Statuses to list. Empty = AVAILABLE only (public catalog); anything else is the admin listing
+    private Set<VehicleStatus> statuses;
     private Integer page;
     private Integer limit;
 }

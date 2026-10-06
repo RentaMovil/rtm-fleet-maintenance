@@ -10,4 +10,7 @@ import java.lang.annotation.Target;
 @Target(ElementType.PARAMETER)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface CurrentUser {
+
+    // false: the endpoint is also public; without a token the parameter is null (an invalid token is still 401)
+    boolean required() default true;
 }

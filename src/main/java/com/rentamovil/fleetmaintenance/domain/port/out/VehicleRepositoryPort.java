@@ -1,0 +1,33 @@
+package com.rentamovil.fleetmaintenance.domain.port.out;
+
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
+
+import com.rentamovil.fleetmaintenance.domain.entity.Vehicle;
+import com.rentamovil.fleetmaintenance.domain.entity.VehicleSearchCriteria;
+import com.rentamovil.fleetmaintenance.domain.enums.VehicleStatus;
+
+// What the domain needs to store and query vehicles.
+// The real implementation (JPA / SQL Server) lives in infrastructure/persistence.
+public interface VehicleRepositoryPort {
+
+    // Saves and returns the full vehicle (with model, brand, category... resolved)
+    Vehicle save(Vehicle vehicle);
+
+    Optional<Vehicle> findById(Integer id);
+
+    boolean existsByPlate(String plate);
+
+    // Vehicles in those statuses matching the filters (except dates: booking-reservation
+    // resolves those). Ordered by id so paging is stable.
+    List<Vehicle> search(VehicleSearchCriteria criteria, Set<VehicleStatus> statuses);
+
+    // Every vehicle, any status unless one is given (admin inventory). Ordered by id
+    List<Vehicle> findInventory(VehicleStatus status, Integer branchId);
+
+    Map<VehicleStatus, Long> countByStatus();
+
+    boolean existsByBranchId(Integer branchId);
+}

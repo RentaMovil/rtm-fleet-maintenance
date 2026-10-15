@@ -1,0 +1,24 @@
+# fleet-maintenance in its own container. rtm-iam-db and rtm-fleet-maintenance-db must run first
+# (SQL Server + migrations); everything shares the "rentamovil" Docker network.
+services:
+  fleet-maintenance:
+    build: .
+    container_name: rentamovil-fleet-maintenance
+    # Variables from .env (fleet_app password...)
+    env_file: .env
+    environment:
+      # Inside Docker nothing is on "localhost": each container is reached by its network name
+      DATABASE_URL: jdbc:sqlserver://sqlserver:1433;databaseName=rentamovil;encrypt=true;trustServerCertificate=true
+      IAM_URL: http://iam:3001
+      BOOKING_URL: http://booking-reservation:3003
+    ports:
+      - "${APP_FLEET_MAINTENANCE_PORT:-3002}:3002"
+    networks:
+      rentamovil:
+        # The gateway reaches it by this name: http://fleet-maintenance:3002
+        aliases: [fleet-maintenance]
+    restart: unless-stopped
+
+networks:
+  rentamovil:
+    external: true

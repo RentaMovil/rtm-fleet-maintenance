@@ -12,7 +12,7 @@ services:
       IAM_URL: http://iam:3001
       BOOKING_URL: http://booking-reservation:3003
     ports:
-      - "${APP_FLEET_MAINTENANCE_PORT:-3002}:3002"
+      - "127.0.0.1:${APP_FLEET_MAINTENANCE_PORT:-3002}:3002"
     networks:
       rentamovil:
         # The gateway reaches it by this name: http://fleet-maintenance:3002

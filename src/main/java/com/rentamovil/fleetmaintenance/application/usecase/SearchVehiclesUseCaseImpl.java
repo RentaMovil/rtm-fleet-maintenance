@@ -12,7 +12,7 @@ import com.rentamovil.fleetmaintenance.domain.entity.Vehicle;
 import com.rentamovil.fleetmaintenance.domain.entity.VehicleSearchCriteria;
 import com.rentamovil.fleetmaintenance.domain.enums.VehicleStatus;
 import com.rentamovil.fleetmaintenance.domain.exception.InvalidDataException;
-import com.rentamovil.fleetmaintenance.domain.exception.InvalidTokenException;
+import com.rentamovil.common.exception.InvalidTokenException;
 import com.rentamovil.fleetmaintenance.domain.port.in.SearchVehiclesUseCase;
 import com.rentamovil.fleetmaintenance.domain.port.out.ReservationOccupancyPort;
 import com.rentamovil.fleetmaintenance.domain.port.out.VehicleRepositoryPort;

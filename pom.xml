@@ -18,6 +18,14 @@
 		<nimbus-jose-jwt.version>10.10</nimbus-jose-jwt.version>
 	</properties>
 	<dependencies>
+		<!-- Shared GlobalExceptionHandler skeleton and RequestLogFilter (ADR-011). Pilot adoption:
+		     local SNAPSHOT for now - bump to the published GitHub Packages version and add the
+		     <repositories> block from rtm-common's README once a real release is tagged. -->
+		<dependency>
+			<groupId>com.rentamovil</groupId>
+			<artifactId>rtm-common</artifactId>
+			<version>0.1.0-SNAPSHOT</version>
+		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-webmvc</artifactId>

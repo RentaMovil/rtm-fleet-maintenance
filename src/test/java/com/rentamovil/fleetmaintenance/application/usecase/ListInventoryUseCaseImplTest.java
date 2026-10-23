@@ -16,7 +16,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.rentamovil.fleetmaintenance.domain.entity.Vehicle;
 import com.rentamovil.fleetmaintenance.domain.enums.VehicleStatus;
-import com.rentamovil.fleetmaintenance.domain.exception.ForbiddenException;
+import com.rentamovil.common.exception.ForbiddenException;
 import com.rentamovil.fleetmaintenance.domain.port.out.VehicleRepositoryPort;
 
 @ExtendWith(MockitoExtension.class)

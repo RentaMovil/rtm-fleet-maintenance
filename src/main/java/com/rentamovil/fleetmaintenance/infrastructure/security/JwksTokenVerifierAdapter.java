@@ -21,7 +21,7 @@ import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.proc.DefaultJWTProcessor;
 import com.rentamovil.fleetmaintenance.domain.entity.AuthenticatedUser;
 import com.rentamovil.fleetmaintenance.domain.exception.DependencyUnavailableException;
-import com.rentamovil.fleetmaintenance.domain.exception.InvalidTokenException;
+import com.rentamovil.common.exception.InvalidTokenException;
 import com.rentamovil.fleetmaintenance.domain.port.out.TokenVerifierPort;
 
 // Verifies iam access tokens with its PUBLIC key (GET iam/jwks): RS256 signature and expiry.

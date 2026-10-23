@@ -21,9 +21,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.rentamovil.fleetmaintenance.domain.entity.Vehicle;
 import com.rentamovil.fleetmaintenance.domain.enums.VehicleStatus;
-import com.rentamovil.fleetmaintenance.domain.exception.ForbiddenException;
+import com.rentamovil.common.exception.ForbiddenException;
 import com.rentamovil.fleetmaintenance.domain.exception.InvalidDataException;
-import com.rentamovil.fleetmaintenance.domain.exception.ResourceAlreadyExistsException;
+import com.rentamovil.common.exception.ResourceAlreadyExistsException;
 import com.rentamovil.fleetmaintenance.domain.port.in.VehicleData;
 import com.rentamovil.fleetmaintenance.domain.port.out.AuditPort;
 import com.rentamovil.fleetmaintenance.domain.port.out.BranchRepositoryPort;

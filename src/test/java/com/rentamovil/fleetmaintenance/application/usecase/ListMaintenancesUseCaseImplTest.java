@@ -19,7 +19,7 @@ import com.rentamovil.fleetmaintenance.domain.entity.AuthenticatedUser;
 import com.rentamovil.fleetmaintenance.domain.entity.VehicleMaintenance;
 import com.rentamovil.fleetmaintenance.domain.entity.Permissions;
 import com.rentamovil.fleetmaintenance.domain.enums.MaintenanceStatus;
-import com.rentamovil.fleetmaintenance.domain.exception.ForbiddenException;
+import com.rentamovil.common.exception.ForbiddenException;
 import com.rentamovil.fleetmaintenance.domain.port.out.VehicleMaintenanceRepositoryPort;
 
 @ExtendWith(MockitoExtension.class)

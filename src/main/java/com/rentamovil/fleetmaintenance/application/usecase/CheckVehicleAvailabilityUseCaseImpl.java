@@ -4,7 +4,7 @@ import java.time.LocalDate;
 
 import com.rentamovil.fleetmaintenance.domain.entity.Vehicle;
 import com.rentamovil.fleetmaintenance.domain.enums.VehicleStatus;
-import com.rentamovil.fleetmaintenance.domain.exception.ResourceNotFoundException;
+import com.rentamovil.common.exception.ResourceNotFoundException;
 import com.rentamovil.fleetmaintenance.domain.port.in.CheckVehicleAvailabilityUseCase;
 import com.rentamovil.fleetmaintenance.domain.port.out.ReservationOccupancyPort;
 import com.rentamovil.fleetmaintenance.domain.port.out.VehicleRepositoryPort;

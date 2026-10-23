@@ -23,8 +23,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import com.rentamovil.fleetmaintenance.domain.entity.Branch;
 import com.rentamovil.fleetmaintenance.domain.entity.OperatingHour;
-import com.rentamovil.fleetmaintenance.domain.exception.BusinessRuleException;
-import com.rentamovil.fleetmaintenance.domain.exception.ForbiddenException;
+import com.rentamovil.common.exception.BusinessRuleException;
+import com.rentamovil.common.exception.ForbiddenException;
 import com.rentamovil.fleetmaintenance.domain.exception.InvalidDataException;
 import com.rentamovil.fleetmaintenance.domain.port.in.BranchData;
 import com.rentamovil.fleetmaintenance.domain.port.out.AuditPort;

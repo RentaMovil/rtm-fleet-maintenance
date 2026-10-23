@@ -6,8 +6,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.rentamovil.fleetmaintenance.domain.entity.Vehicle;
 import com.rentamovil.fleetmaintenance.domain.enums.VehicleStatus;
-import com.rentamovil.fleetmaintenance.domain.exception.BusinessRuleException;
-import com.rentamovil.fleetmaintenance.domain.exception.ResourceNotFoundException;
+import com.rentamovil.common.exception.BusinessRuleException;
+import com.rentamovil.common.exception.ResourceNotFoundException;
 import com.rentamovil.fleetmaintenance.domain.port.in.HandleRentalEventUseCase;
 import com.rentamovil.fleetmaintenance.domain.port.out.AuditPort;
 import com.rentamovil.fleetmaintenance.domain.port.out.VehicleRepositoryPort;

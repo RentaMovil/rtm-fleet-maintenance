@@ -8,7 +8,7 @@ import com.rentamovil.fleetmaintenance.domain.entity.AuthenticatedUser;
 import com.rentamovil.fleetmaintenance.domain.entity.Permissions;
 import com.rentamovil.fleetmaintenance.domain.entity.Vehicle;
 import com.rentamovil.fleetmaintenance.domain.enums.VehicleStatus;
-import com.rentamovil.fleetmaintenance.domain.exception.ResourceAlreadyExistsException;
+import com.rentamovil.common.exception.ResourceAlreadyExistsException;
 import com.rentamovil.fleetmaintenance.domain.port.in.RegisterVehicleUseCase;
 import com.rentamovil.fleetmaintenance.domain.port.in.VehicleData;
 import com.rentamovil.fleetmaintenance.domain.port.out.AuditPort;

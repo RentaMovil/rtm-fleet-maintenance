@@ -21,7 +21,7 @@ import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import com.rentamovil.fleetmaintenance.domain.entity.AuthenticatedUser;
-import com.rentamovil.fleetmaintenance.domain.exception.InvalidTokenException;
+import com.rentamovil.common.exception.InvalidTokenException;
 
 class JwksTokenVerifierAdapterTest {
 

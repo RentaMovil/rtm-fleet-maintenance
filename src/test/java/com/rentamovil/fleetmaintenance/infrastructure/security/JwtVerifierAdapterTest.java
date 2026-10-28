@@ -14,27 +14,25 @@ import com.nimbusds.jose.JWSAlgorithm;
 import com.nimbusds.jose.JWSHeader;
 import com.nimbusds.jose.crypto.MACSigner;
 import com.nimbusds.jose.crypto.RSASSASigner;
-import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.gen.RSAKeyGenerator;
-import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import com.nimbusds.jwt.JWTClaimsSet;
 import com.nimbusds.jwt.SignedJWT;
 import com.rentamovil.fleetmaintenance.domain.entity.AuthenticatedUser;
 import com.rentamovil.fleetmaintenance.domain.exception.InvalidTokenException;
 
-class JwksTokenVerifierAdapterTest {
+class JwtVerifierAdapterTest {
 
     private static RSAKey iamKey;
     private static RSAKey otherKey;
-    private static JwksTokenVerifierAdapter verifier;
+    private static JwtVerifierAdapter verifier;
 
     @BeforeAll
     static void setUp() throws Exception {
         iamKey = new RSAKeyGenerator(2048).keyID("iam").generate();
         otherKey = new RSAKeyGenerator(2048).keyID("iam").generate();
-        //What iam would publish at /jwks: the public part only
-        verifier = new JwksTokenVerifierAdapter(new ImmutableJWKSet<>(new JWKSet(iamKey.toPublicJWK())));
+        // What this adapter holds in .env: only the public part
+        verifier = new JwtVerifierAdapter(iamKey.toPublicJWK());
     }
 
     private static String token(RSAKey key, Instant expiresAt) throws Exception {
